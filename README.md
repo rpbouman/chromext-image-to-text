@@ -4,11 +4,6 @@ When activatied, the image is analyzed by a `LanguageModel` (see: https://develo
 The result of the analysis is streamed from the model and copied to the clipboard.
 
 
-When activated, a `LanguageModel`  is instantiated with a system prompt that instructs the model to analyze images uploaded by the user.
-The image is then offered as prompt. The output is then streamed and buffered, and finally copied to the clipboard, so it can be further used in other applications.
-
-After clicking the context menu item, a (modal) dialog pops up to inform the user of the progress.
-
 # Installation
 1) Download or clone this repo.
 2) In google chrome, open the Manage Extensions page (menu > Extensions > Manage Extensions).
