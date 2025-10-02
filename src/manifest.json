@@ -1,0 +1,44 @@
+{
+  "name": "Image-to-Text Contextmenu",
+  "version": "0.0.1",
+  "manifest_version": 3,
+  "description": "Context menu item analyzes pictures, charts, graphs & diagrams. Copies description and extracted text and/or data to the clipboard.",
+  "icons": {
+    "16": "images/icon16x16.png",
+    "32": "images/icon32x32.png",
+    "48": "images/icon48x48.png",
+    "64": "images/icon64x64.png",
+    "128": "images/icon128x128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "matches": ["*://*/*"],
+      "resources": [
+        "images/icon16x16.png",
+        "images/icon32x32.png",
+        "images/icon48x48.png",
+        "images/icon64x64.png",
+        "images/icon128x128.png"
+      ]
+    }
+  ],
+  "permissions": [
+    "clipboardWrite",
+    "contextMenus",
+    "offscreen"
+  ],
+  "host_permissions": [
+    "*://*/*",
+    "<all_urls>"
+  ],
+  "content_scripts": [
+   {
+     "matches": ["*://*/*"],
+     "js": ["content/content.js"],
+     "css": ["content/content.css"]
+   }
+  ],
+  "background": {
+    "service_worker": "background/background.js"
+  }  
+}
