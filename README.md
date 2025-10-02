@@ -12,3 +12,11 @@ The extension attempts to extract different bits of information depedning on the
 - screenshots of code or pages from a book are typically extracted in full, and there may be some descriptive text to explain the context
 - for diagrams, like flow charts, an attempt is made to extract a list of elements describing their shapes, colors, and any text labels; A list of the relationships between these elements is also extracted.
 - for screenshots of data grids and spreadsheets, the data shoudl be extracted and returned as text in a tabular format. 
+
+# Installation
+1) Download or clone this repo.
+2) In google chrome, open the Manage Extensions page (menu > Extensions > Manage Extensions).
+3) In the extension manager page, click the "Load Unpacked" button.
+4) The filebrowser opens. Browse to the `src` folder, select it, and choose "Select Folder"
+
+That's it!
