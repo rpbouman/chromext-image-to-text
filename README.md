@@ -1,8 +1,10 @@
 # chromext-image-to-text
-A google chrome extension to extract text from images appearing in webpages.
+This extension provides a context menu item for images appearing on webpages. 
+When activatied, the image is analyzed by a `LanguageModel` (see: https://developer.chrome.com/docs/ai/prompt-api).
+The result of the analysis is streamed from the model and copied to the clipboard.
 
-This extension provides a context menu item for images appearing on webpages.
-When activated, a `LanguageModel` (see: https://developer.chrome.com/docs/ai/prompt-api) is instantiated with a system prompt that instructs the model to analyze images uploaded by the user.
+
+When activated, a `LanguageModel`  is instantiated with a system prompt that instructs the model to analyze images uploaded by the user.
 The image is then offered as prompt. The output is then streamed and buffered, and finally copied to the clipboard, so it can be further used in other applications.
 
 After clicking the context menu item, a (modal) dialog pops up to inform the user of the progress.
@@ -20,3 +22,5 @@ The extension attempts to extract different bits of information depedning on the
 4) The filebrowser opens. Browse to the `src` folder, select it, and choose "Select Folder"
 
 That's it!
+
+# Description
