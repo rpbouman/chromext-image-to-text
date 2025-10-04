@@ -12,7 +12,11 @@
   },
   "web_accessible_resources": [
     {
-      "matches": ["*://*/*"],
+      "matches": [
+        "*://*/*",
+        "file:///*",
+        "<all_urls>"
+      ],
       "resources": [
         "images/icon16x16.png",
         "images/icon32x32.png",
@@ -25,10 +29,12 @@
   "permissions": [
     "clipboardWrite",
     "contextMenus",
-    "offscreen"
+    "offscreen",
+    "scripting"
   ],
   "host_permissions": [
     "*://*/*",
+    "file:///*",
     "<all_urls>"
   ],
   "content_scripts": [

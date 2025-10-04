@@ -6,7 +6,7 @@ async function fetchImageAsBlob(srcUrl) {
   return blob;
 }
 
-async function getImageData(message){
+async function getImageData(message){  
   var imageData;
   if (message.base64) {
     var array = Uint8Array.fromBase64(message.base64);
@@ -262,16 +262,14 @@ async function imageToText(request){
 // https://stackoverflow.com/questions/48107746/chrome-extension-message-not-sending-response-undefined
 //
 function handleMessage(message, sender, sendResponse) {
-  var imageSrcUrl = message.image.srcUrl;
-  var response = {
-    type: message.type,
-    image: {
-      srcUrl: imageSrcUrl
-    },
-  }
-  
   var proxyHandler = async function(sendResponse){
+    var response = {
+      type: message.type,
+    }
     switch (message.type){
+      case 'ping':
+        response.response = 'pong';
+        break;
       case 'alert-no-language-model':
         alert([
           'LanguageModel not found.',
@@ -280,6 +278,11 @@ function handleMessage(message, sender, sendResponse) {
         ].join('\r\n'));
         break;
       case 'image-to-text':
+        var image = message.image;
+        var srcUrl = image.srcUrl;
+        response.image = {
+          srcUrl: srcUrl
+        };
         try {
           var text = await imageToText(message.image);
           response.text = text;
@@ -298,4 +301,10 @@ function handleMessage(message, sender, sendResponse) {
   return true;
 }
 
+var contextMenuElement;
+function contextMenuHandler(event){
+  contextMenuElement = event.target;
+}
+
 chrome.runtime.onMessage.addListener(handleMessage);
+document.addEventListener('contextmenu', contextMenuHandler);
