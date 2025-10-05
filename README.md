@@ -1,5 +1,5 @@
 # chromext-image-to-text
-<img alt="Image to Text icon" src="src/images/icon128x128.png?raw=true" style="float:left"/> A google chrome extension to extract text from images appearing in webpages. The extension installs a context menu item that is available on any image. Clicking the context menu item pops up a dialog that informs you of the progress. After analyzing the picture, a text is copied to the clipboard so it may be used in other applications.
+![Image to Text icon](src/images/icon128x128.png?raw=true){align=left; float=left; } A google chrome extension to extract text from images appearing in webpages. The extension installs a context menu item that is available on any image. Clicking the context menu item pops up a dialog that informs you of the progress. After analyzing the picture, a text is copied to the clipboard so it may be used in other applications.
 
 ## Installation
 
