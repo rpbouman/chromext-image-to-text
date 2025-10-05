@@ -64,13 +64,17 @@ body {
       text-align: center;
       
       > button {
-      }
-
-      > button::before {
         font-family: system-ui;
-        content: "Ok";
       }
-      
     }
   }
+ 
+  > dialog.image-to-text:not( [data-image-to-text-state=ready] ) > footer > button[name=okButton] {
+    display: none;
+  }
+
+  > dialog.image-to-text[data-image-to-text-state=ready] > footer > button[name=cancelButton] {
+    display: none;
+  }
+  
 }
