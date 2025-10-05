@@ -107,7 +107,12 @@ function dialogCancelButtonClickHandler(){
     abortController.abort();
     abortController = null;
   }
-  setState('cancelled');
+  if (getState() === 'error'){
+    setState('idle');
+  }
+  else {
+    setState('cancelled');
+  }
 }
 
 function isCancelled(){
