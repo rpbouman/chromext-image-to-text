@@ -149,6 +149,16 @@ function createDialog(){
   var img = document.createElement('img');
   img.src = chrome.runtime.getURL('images/icon16x16.png');
   header.appendChild(img);
+  
+  var span = document.createElement('span');
+  span.textContent = 'Image to Text | ';
+  header.appendChild(span);  
+  
+  var donationLink = document.createElement('a');
+  donationLink.setAttribute('href', 'https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84');
+  donationLink.setAttribute('target', 'donate');
+  donationLink.textContent = 'Donate';
+  header.appendChild(donationLink);
 
   var section = document.createElement('section');
   dialog.appendChild(section);
