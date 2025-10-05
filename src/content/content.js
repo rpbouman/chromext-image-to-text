@@ -1,4 +1,5 @@
 var baseModel;
+var abortController;
 
 async function fetchImageAsBlob(srcUrl) {
   var response = await fetch(srcUrl);
@@ -64,8 +65,16 @@ async function getModel(){
   try {
     if (baseModel === undefined){
       baseModel = await getBaseModel();
+      if (isCancelled()){
+        return null;
+      }
     }
-    model = await baseModel.clone();
+    if (!abortController){
+      abortController = new AbortController();
+    }
+    model = await baseModel.clone({
+      signal: abortController.signal
+    });
   }
   catch(e) {
     switch (e.name){
@@ -87,6 +96,42 @@ async function getModel(){
 
 async function copyToClipboard(text){
   navigator.clipboard.writeText(text);
+}
+
+function dialogOkButtonClickHandler(){
+  setState('idle')
+}
+
+function dialogCancelButtonClickHandler(){
+  if (abortController){
+    abortController.abort();
+    abortController = null;
+  }
+  setState('cancelled');
+}
+
+function isCancelled(){
+  return getState() === 'cancelled';
+}
+
+function getState(){
+  var dialog = getDialog();
+  var state = dialog.getAttribute('data-image-to-text-state');
+  return state;
+}
+
+function setState(newState){
+  var dialog = getDialog();
+  dialog.setAttribute('data-image-to-text-state', newState);
+  if (newState === 'idle'){
+    if (dialog.open){
+      dialog.close();
+    }
+  }
+  else
+  if (!dialog.open){
+    dialog.showModal();
+  }
 }
 
 function createDialog(){
@@ -125,11 +170,19 @@ function createDialog(){
   var footer = document.createElement('footer');
   dialog.appendChild(footer);  
   
-  var button = document.createElement('button');
-  footer.appendChild(button);
-  button.addEventListener('click', function(){
-    dialog.close();
-  });
+  var okButton = document.createElement('button');
+  okButton.setAttribute('type', 'button');
+  okButton.setAttribute('name', 'okButton');
+  okButton.textContent = 'Ok';
+  okButton.addEventListener('click', dialogOkButtonClickHandler);
+  footer.appendChild(okButton);
+
+  var cancelButton = document.createElement('button');
+  cancelButton.setAttribute('type', 'button');
+  cancelButton.setAttribute('name', 'cancelButton');
+  cancelButton.textContent = 'Cancel';
+  cancelButton.addEventListener('click', dialogCancelButtonClickHandler);
+  footer.appendChild(cancelButton);
 
   return dialog;
 }
@@ -137,11 +190,15 @@ function createDialog(){
 function updateDialog(options){
   var dialog = getDialog();
   
+  if (options.state){
+    setState(options.state);
+  }
+  
   var progressElements = dialog.querySelectorAll('section > progress');
   var progress = options.progress;
   if (progress !== undefined) {
 
-    progressElements.item(0).value = progress;
+    progressElements.item(0).setAttribute('value', progress);
   }
 
   var progress2 = options.progress2;
@@ -173,31 +230,39 @@ function getDialog(){
   var dialog = document.getElementById(id);
   if (dialog === null){
     dialog = createDialog();
+    setState('idle');
   }
   return dialog;
 }
 
 async function imageToText(request){
   var message = '';
-  var dialog = getDialog();
-  dialog.showModal();
   var model;
   try {
     updateDialog({
+      state: 'get-image',
       message: 'Getting image',
       progress: '0',
       progress2: '0',
       output: ''
     });
     var imageData = await getImageData(request); 
+    if (isCancelled()){
+      return;
+    }
     
     updateDialog({
+      state: 'get-model',
       message: 'Getting model',
       progress: '10'
-    });
-    
-    model = await getModel();
+    });    
+    model = await getModel(abortController);
+    if (isCancelled()){
+      return;
+    }
+
     updateDialog({
+      state: 'analyzing-image',
       message: 'Analyzing image',
       progress: '20'
     });
@@ -205,29 +270,38 @@ async function imageToText(request){
       role: 'user',
       content: [{type: 'image', value: imageData}]
     }]);
+    if (isCancelled()){
+      return;
+    }
 
     var progress2 = 0;
     updateDialog({
+      state: 'waiting-for-output',
       message: 'Waiting for output',
       progress: '30',
       progress2: progress2
-    });
-    
+    });    
     for await (var chunk of responseStream) {
       message += chunk;
       if (progress2 === 0){
         updateDialog({
-          message: 'Generating output',
+          state: 'generating-output',
           progress: '40',
         });
       }
+
       progress2 = progress2 === 100 ? 0 : progress2 + 1;
       updateDialog({
         output: message.slice(message.length - 35),
         progress2: progress2
       });
+      if (isCancelled()){
+        mesage += '\r\n\r\nABORTED AT USER REQUEST';
+        return message;
+      }
     }
     updateDialog({
+      state: 'ready',
       message: 'Output copied to clipboard',
       progress: '50',
       output: ''
@@ -235,8 +309,9 @@ async function imageToText(request){
   }
   catch (e){
     updateDialog({
+      state: 'error',
       message: e.name,
-      progress: '100',
+      progress: '50', // todo: derive from max
       output: e.message
     });
     throw e;
@@ -244,11 +319,16 @@ async function imageToText(request){
   finally {
     try {
       if (model) {
+        abortController = null;
         model.destroy();
       }
     }
     catch(e){
       console.error(e);
+    }
+    var state = getState();
+    if (['ready', 'error'].indexOf(state) === -1){
+      setState('idle');
     }
   }
   return message;  
