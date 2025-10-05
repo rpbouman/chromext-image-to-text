@@ -270,12 +270,8 @@ function handleMessage(message, sender, sendResponse) {
       case 'ping':
         response.response = 'pong';
         break;
-      case 'alert-no-language-model':
-        alert([
-          'LanguageModel not found.',
-          'To fix the issue, navigate to the enable "Promt API for Gemini mini" flag and enable it.',
-          'For your convenience, this flag has been copied to the clipbaord.',
-        ].join('\r\n'));
+      case 'alert':
+        alert(message.text);
         break;
       case 'image-to-text':
         var image = message.image;

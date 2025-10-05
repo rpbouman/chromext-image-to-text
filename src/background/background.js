@@ -83,9 +83,24 @@ async function injectScriptIntoTab(tabId){
 
 async function contextMenuClickHandler(info, tab){
   var imageSrcUrl = info.srcUrl;
-  var imageData = await fetchImageAsBase64(imageSrcUrl);
-  imageData.srcUrl = imageSrcUrl;
+  var imageData;
   
+  try {
+    imageData = await fetchImageAsBase64(imageSrcUrl);
+  }
+  catch (e){
+    await chrome.tabs.sendMessage(tab.id, {
+      type: 'alert',
+      text: [
+        'Error acquiring the image: ',
+        '',
+        `${e.name}: ${e.message}`
+      ].join('\r\n')
+    });
+    return;
+  }
+  
+  imageData.srcUrl = imageSrcUrl;
   var request = {
     type: 'image-to-text',
     image: imageData
@@ -139,7 +154,12 @@ async function contextMenuFallbackClickHandler(info, tab){
     text: flagUrl
   });
   var response = await chrome.tabs.sendMessage(tab.id, {
-    type: 'alert-no-language-model'
+    type: 'alert',
+    text: [
+      'LanguageModel not found.',
+      'To fix the issue, navigate to the enable "Promt API for Gemini mini" flag and enable it.',
+      'For your convenience, this flag has been copied to the clipbaord.',
+    ].join('\r\n')
   });
 }
 
