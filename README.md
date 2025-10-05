@@ -1,4 +1,4 @@
-# chromext-image-to-text
+# ![Image to Text icon](src/images/icon128x128.png?raw=true) chromext-image-to-text
 A google chrome extension to extract text from images appearing in webpages.
 
 ## Installation
