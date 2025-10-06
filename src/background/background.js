@@ -69,119 +69,93 @@ async function fetchImageAsBase64(srcUrl){
   };
 }
 
-async function injectScriptIntoTab(tabId){
-  await chrome.scripting.executeScript({
-    target: {tabId: tabId},
-    files: ['content/content.js']
-  });
-  await chrome.scripting.insertCSS({
-    target: {tabId: tabId},
-    files: ['content/content.css']
-  });
+function contextMenuClickHandler(info, tab){
   
+  var proxyHandler = async function(info, tab) {
+    var imageSrcUrl = info.srcUrl;
+    var imageData;
+    
+    try {
+      imageData = await fetchImageAsBase64(imageSrcUrl);
+    }
+    catch (e){
+      await chrome.tabs.sendMessage(tab.id, {
+        type: 'alert',
+        text: [
+          'Error acquiring the image: ',
+          '',
+          `${e.name}: ${e.message}`
+        ].join('\r\n')
+      });
+      return;
+    }
+    
+    imageData.srcUrl = imageSrcUrl;
+    var request = {
+      type: 'image-to-text',
+      image: imageData
+    };
+    var requestOptions = {
+      frameId: info.frameId
+    };
+      
+    var response;
+    response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
+    var textForClipboard;
+    if (response.success === true) {
+      textForClipboard = [
+        'Page: ' + tab.url,
+        'Image: ' + imageSrcUrl,
+        '',
+        response.text
+      ].join('\r\n');
+    }
+    else {
+      textForClipboard = [
+        'Page: ' + tab.url,
+        'Image: ' + imageSrcUrl,
+        '',
+        'Error: ' + response.errorType,
+        'Message: ' + response.errorMessage
+      ].join('\r\n');
+    }
+    copyToClipboard({
+      text: textForClipboard
+    });
+  }
+  proxyHandler(info, tab);
 }
 
-async function contextMenuClickHandler(info, tab){
-  var imageSrcUrl = info.srcUrl;
-  var imageData;
-  
-  try {
-    imageData = await fetchImageAsBase64(imageSrcUrl);
-  }
-  catch (e){
-    await chrome.tabs.sendMessage(tab.id, {
+function contextMenuFallbackClickHandler(info, tab){
+  var proxHandler = async function(info, tab){
+    var flagUrl = 'chrome://flags/#prompt-api-for-gemini-nano-multimodal-input';
+    copyToClipboard({
+      text: flagUrl
+    });
+    var response = await chrome.tabs.sendMessage(tab.id, {
       type: 'alert',
       text: [
-        'Error acquiring the image: ',
-        '',
-        `${e.name}: ${e.message}`
+        'LanguageModel not found.',
+        'To fix the issue, navigate to the enable "Promt API for Gemini mini" flag and enable it.',
+        'For your convenience, this flag has been copied to the clipbaord.',
       ].join('\r\n')
     });
-    return;
   }
-  
-  imageData.srcUrl = imageSrcUrl;
-  var request = {
-    type: 'image-to-text',
-    image: imageData
-  };
-  var requestOptions = {
-    frameId: info.frameId
-  };
-    
-  var response;
-  try {
-    response = await chrome.tabs.sendMessage(tab.id, {type: 'ping'}, requestOptions);
-    if (!response || response.response !== 'pong') {
-      throw new Error(`Content script didn't respond to ping request`);
-    }
-  }
-  catch(e){
-    switch (e.message){
-      case 'Could not establish connection. Receiving end does not exist.':
-        await injectScriptIntoTab(tab.id);
-        break;
-    }
-  }
-  response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
-  
-  var textForClipboard;
-  if (response.success === true) {
-    textForClipboard = [
-      'Page: ' + tab.url,
-      'Image: ' + imageSrcUrl,
-      '',
-      response.text
-    ].join('\r\n');
-  }
-  else {
-    textForClipboard = [
-      'Page: ' + tab.url,
-      'Image: ' + imageSrcUrl,
-      '',
-      'Error: ' + response.errorType,
-      'Message: ' + response.errorMessage
-    ].join('\r\n');
-  }
-  copyToClipboard({
-    text: textForClipboard
-  });
+  proxHandler(info, tab);
 }
 
-async function contextMenuFallbackClickHandler(info, tab){
-  var flagUrl = 'chrome://flags/#prompt-api-for-gemini-nano-multimodal-input';
-  copyToClipboard({
-    text: flagUrl
-  });
-  var response = await chrome.tabs.sendMessage(tab.id, {
-    type: 'alert',
-    text: [
-      'LanguageModel not found.',
-      'To fix the issue, navigate to the enable "Promt API for Gemini mini" flag and enable it.',
-      'For your convenience, this flag has been copied to the clipbaord.',
-    ].join('\r\n')
-  });
-}
 
-async function initContextMenu(){
-  var handler;
-  if (typeof LanguageModel === 'undefined') {
-    handler = contextMenuFallbackClickHandler
-  }
-  else {
-    handler = contextMenuClickHandler;
-  }
-  
+chrome.runtime.onInstalled.addListener(function(){
   var contextMenuItemId = chrome.runtime.id + '_contextmenuitem';
-  
-  await chrome.contextMenus.removeAll();
   chrome.contextMenus.create({
     title: 'Image to text',
     contexts: ['image'],
     id: contextMenuItemId
-  });
-  
-  chrome.contextMenus.onClicked.addListener(handler);
-}
+  });  
+})
 
-initContextMenu();
+chrome.contextMenus.onClicked.addListener(
+  typeof LanguageModel === 'undefined' 
+  ? contextMenuFallbackClickHandler 
+  : contextMenuClickHandler
+);

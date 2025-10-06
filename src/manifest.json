@@ -29,8 +29,7 @@
   "permissions": [
     "clipboardWrite",
     "contextMenus",
-    "offscreen",
-    "scripting"
+    "offscreen"
   ],
   "host_permissions": [
     "*://*/*",

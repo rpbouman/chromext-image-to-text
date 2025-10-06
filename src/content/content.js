@@ -158,12 +158,14 @@ function createDialog(){
   var span = document.createElement('span');
   span.textContent = 'Image to Text | ';
   header.appendChild(span);  
-  
+
+/*
   var donationLink = document.createElement('a');
   donationLink.setAttribute('href', 'https://www.paypal.com/donate/?hosted_button_id=776A6UNZ35M84');
   donationLink.setAttribute('target', 'donate');
   donationLink.textContent = 'Donate';
   header.appendChild(donationLink);
+*/
 
   var section = document.createElement('section');
   dialog.appendChild(section);
@@ -305,9 +307,9 @@ async function imageToText(request){
         });
       }
 
-      progress2 = progress2 === 100 ? 0 : progress2 + 1;
+      progress2 = progress2 === 100 ? 1 : progress2 + 1;
       updateDialog({
-        output: message.slice(message.length - 35),
+        output: message.slice(message.length - 40),
         progress2: progress2
       });
       if (isCancelled()){
@@ -393,7 +395,7 @@ function handleMessage(message, sender, sendResponse) {
 }
 
 var contextMenuElement;
-function contextMenuHandler(event){
+async function contextMenuHandler(event){
   contextMenuElement = event.target;
 }
 
