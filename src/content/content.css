@@ -6,12 +6,12 @@ body {
   > dialog.image-to-text {
     
     overflow: hidden;
-    width: 200px;
-    min-width: 200px;
-    max-width: 200px;
-    height: 120px;
-    min-height: 120px;
-    max-height: 120px;
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    height: 115px;
+    min-height: 115px;
+    max-height: 115px;
     
     font-family: system-ui;
     border-width: 1px;
@@ -19,8 +19,12 @@ body {
     padding: 4px;
     
     > header {
+      all: revert;      
+    }
+
+    > header {
     
-      padding: 0em .2em .2em .2em;
+      padding: 0em .2em .1em .2em;
       border-top-left-radius: .3em;
       border-top-right-radius: .3em;
       top: 0px;
@@ -29,14 +33,25 @@ body {
       
       > img {
         margin-right: 4px;
+        margin-top: 2px;
+        vertical-align: top;
+      }
+
+      > span {
+        vertical-align: top;
       }
       
       > a {
         color: rgb(255, 200, 200);
+        vertical-align: top;
       }
                       
     }
     
+    > section {
+      all: revert;
+    }
+
     > section {
       
       height: calc( 100% - 45px );
@@ -59,12 +74,21 @@ body {
       }
       
     }
+
+    > footer {
+      all: revert;
+    }
     
     > footer {
       bottom: 0px;
       text-align: center;
       
       > button {
+        all: revert;
+      }
+      
+      > button {
+        border-radius: .5em;
         font-family: system-ui;
       }
     }
