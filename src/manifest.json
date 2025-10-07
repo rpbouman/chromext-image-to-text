@@ -38,7 +38,7 @@
   ],
   "content_scripts": [
    {
-     "matches": ["*://*/*"],
+     "matches": ["*://*/*", "file:///*"],
      "js": ["content/content.js"],
      "css": ["content/content.css"]
    }
