@@ -49,8 +49,8 @@ async function fetchImageAsBase64(srcUrl){
   var headers = response.headers;
   var contentType = headers.get('Content-Type');
 
-  var base64;
-  if (contentType.startsWith('image\/svg+xml;')){
+  var base64;  
+  if (contentType && /^image\/svg\+xml\b/.test(contentType)){
     var text = await response.text();
     var dataUrl = 'data:image\/svg+xml,' + encodeURIComponent(text);
     var imageData = await renderImage(dataUrl);
