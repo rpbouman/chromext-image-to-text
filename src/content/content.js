@@ -9,6 +9,7 @@ async function fetchImageAsBlob(srcUrl) {
 
 async function getImageData(message){  
   var imageData;
+  var srcUrl = message.srcUrl;
   if (message.base64) {
     var array = Uint8Array.fromBase64(message.base64);
     imageData = new Blob([array], {type: message.type});
@@ -156,7 +157,7 @@ function createDialog(){
   header.appendChild(img);
   
   var span = document.createElement('span');
-  span.textContent = 'Image to Text | ';
+  span.textContent = 'Image to Text';
   header.appendChild(span);  
 
 /*
@@ -325,13 +326,37 @@ async function imageToText(request){
     });
   }
   catch (e){
-    updateDialog({
-      state: 'error',
-      message: e.name,
-      progress: '50', // todo: derive from max
-      output: e.message
-    });
-    throw e;
+    _errorName: switch (e.name){
+      case 'UnknownError':
+        switch (e.message){
+          case 'Other generic failures occurred.':
+            updateDialog({
+              state: 'error',
+              message: 'Unexpected Error: Model crashed.',
+              progress: '50', // todo: derive from max
+              output: 'Troubleshooting tips copied to clipboard.'
+            });
+            message = [
+              `The model threw "${e.name}: ${e.message}".`,
+              '',
+              `In general this indicates a "Model crash", i.e. some sort of unrecoverable internal error.`,
+              '',
+              'To troubleshoot, navigate to: chrome://on-device-internals/',
+              '- Check the "Event Logs" tab. If a log is present, then create a bug report against google chrome and include the log.',
+              '- Reset the crash count in the "Model Status" tab, and restart chrome.',
+            ].join('\r\n');
+            break _errorName;
+          default:
+        }
+      default:
+        updateDialog({
+          state: 'error',
+          message: e.name,
+          progress: '50', // todo: derive from max
+          output: e.message
+        });
+        throw e;
+    }
   }
   finally {
     try {
