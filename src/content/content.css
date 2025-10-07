@@ -41,11 +41,15 @@ body {
         vertical-align: top;
       }
       
+      > span:has( + a[href] )::after {
+        content: ' | ';
+      }        
+      
       > a {
         color: rgb(255, 200, 200);
         vertical-align: top;
       }
-                      
+                            
     }
     
     > section {
