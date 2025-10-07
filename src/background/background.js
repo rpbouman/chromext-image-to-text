@@ -144,7 +144,7 @@ function contextMenuFallbackClickHandler(info, tab){
   proxHandler(info, tab);
 }
 
-
+// install the context menu item (only once)
 chrome.runtime.onInstalled.addListener(function(){
   var contextMenuItemId = chrome.runtime.id + '_contextmenuitem';
   chrome.contextMenus.create({
@@ -152,10 +152,19 @@ chrome.runtime.onInstalled.addListener(function(){
     contexts: ['image'],
     id: contextMenuItemId
   });  
-})
+});
 
+// register a listener for the context menu.
+// DO NOT MOVE THIS CODE INSIDE A FUNCTION - LEAVE THIS HERE AT THE TOP LEVEL
+// You might thing the natural place to register the handler would be once, where the context menu is created.
+// Unfortunately, that is wrong. 
+// The reason is that the context menu is created globally and only once for a browser session.
+// The handler for the context many needs to be registered every time the background script is loaded.
+// The browser is quick to evict this background script in case it is not being user (i.e. actively handling events)
 chrome.contextMenus.onClicked.addListener(
   typeof LanguageModel === 'undefined' 
   ? contextMenuFallbackClickHandler 
   : contextMenuClickHandler
 );
+
+
