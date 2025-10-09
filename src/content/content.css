@@ -36,6 +36,7 @@ body {
         margin-right: 4px;
         margin-top: 2px;
         vertical-align: top;
+        display: inline-block !important;
       }
 
       > span {
