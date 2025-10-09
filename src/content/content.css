@@ -13,7 +13,7 @@ body {
     min-height: 115px;
     max-height: 115px;
     
-    font-family: system-ui;
+    font-family: system-ui !important;
     border-width: 1px;
     border-radius: .5em;
     padding: 4px;
@@ -30,6 +30,7 @@ body {
       top: 0px;
       background-color: Highlight;
       color: HighlightText;
+      font-size: 16px;
       
       > img {
         margin-right: 4px;
@@ -58,10 +59,11 @@ body {
 
     > section {
       
+      font-size: 14px;
+      
       height: calc( 100% - 45px );
       
       > span {
-        font-size: smaller;
         display: block;
         width: 100%;
         overflow: hidden;
