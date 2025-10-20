@@ -327,6 +327,24 @@ async function imageToText(request){
   }
   catch (e){
     _errorName: switch (e.name){
+      case 'NotAllowedError':
+        switch(e.message){          
+          case 'Model capability is not available.':
+            updateDialog({
+              state: 'error',
+              message: 'Multi-Modal capability unavailable.',
+              progress: '50', // todo: derive from max
+              output: 'Troubleshooting tips copied to clipboard.'
+            });
+            message = [
+              '- Navigate to: chrome://flags/#prompt-api-for-gemini-nano-multimodal-input',
+              '- Enable the multi-modal capability of the Prompt API',
+              '- Restart chrome and try again.',
+            ].join('\r\n');
+            break _errorName;
+          default:
+        }
+        break;
       case 'UnknownError':
         switch (e.message){
           case 'Other generic failures occurred.':
@@ -376,6 +394,27 @@ async function imageToText(request){
   return message;  
 }
 
+function getContextMenuElementInfo(){
+  var nodeType = contextMenuElement.nodeType;
+  var nodeName = contextMenuElement.nodeName;
+  var elementInfo = {
+    nodeType: nodeType,
+    nodeName: nodeName
+  };
+  if (nodeType === contextMenuElement.ELEMENT_NODE){
+    var attributes = {};
+    var attributeNames = contextMenuElement.getAttributeNames();
+    for (var i = 0; i < attributeNames.length; i++){
+      var attributeName = attributeNames[i];
+      attributes[attributeName] = contextMenuElement.getAttribute(attributeName);
+    }
+    elementInfo.attributes = attributes;
+    var computedStyle = getComputedStyle(contextMenuElement);
+    elementInfo.computedStyle = computedStyle;
+  }
+  return elementInfo;
+}
+
 // note:
 // having an async handler needs some tricky syntax to work in such a way that the message sender 
 // (background script in this case)
@@ -394,6 +433,9 @@ function handleMessage(message, sender, sendResponse) {
         break;
       case 'alert':
         alert(message.text);
+        break;
+      case 'element-info':
+        response.elementInfo = getContextMenuElementInfo();
         break;
       case 'image-to-text':
         var image = message.image;
