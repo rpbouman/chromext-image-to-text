@@ -31,11 +31,12 @@ async function copyToClipboard(text) {
   return response;
 }
 
-async function renderImage(srcUrl){
+async function renderImage(srcUrl, backgroundColor){
   var request = {
     type: 'render-image',
     payload: {
       srcUrl: srcUrl
+    , backgroundColor: backgroundColor
     },
     reasons: [chrome.offscreen.Reason.BLOBS],
     justification: 'Need to render svg images in order to get image data the model can interpret.'
@@ -44,7 +45,7 @@ async function renderImage(srcUrl){
   return response.response;
 }
 
-async function fetchImageAsBase64(srcUrl){
+async function fetchImageAsBase64(srcUrl, backgroundColor){
   var response = await fetch(srcUrl);
   var headers = response.headers;
   var contentType = headers.get('Content-Type');
@@ -53,7 +54,7 @@ async function fetchImageAsBase64(srcUrl){
   if (contentType && /^image\/svg\+xml\b/.test(contentType)){
     var text = await response.text();
     var dataUrl = 'data:image\/svg+xml,' + encodeURIComponent(text);
-    var imageData = await renderImage(dataUrl);
+    var imageData = await renderImage(dataUrl, backgroundColor);
     base64 = imageData.base64;
     contentType = imageData.type;
   }
@@ -74,9 +75,18 @@ function contextMenuClickHandler(info, tab){
   var proxyHandler = async function(info, tab) {
     var imageSrcUrl = info.srcUrl;
     var imageData;
+    var request;
+    requestOptions = {
+      frameId: info.frameId
+    };
     
+    var response;
     try {
-      imageData = await fetchImageAsBase64(imageSrcUrl);
+      response = await chrome.tabs.sendMessage(tab.id, {
+        type: 'element-info'
+      }, requestOptions);
+      backgroundColor = response.elementInfo.computedStyle.backgroundColor;
+      imageData = await fetchImageAsBase64(imageSrcUrl, backgroundColor);
     }
     catch (e){
       await chrome.tabs.sendMessage(tab.id, {
@@ -91,15 +101,11 @@ function contextMenuClickHandler(info, tab){
     }
     
     imageData.srcUrl = imageSrcUrl;
-    var request = {
+    request = {
       type: 'image-to-text',
       image: imageData
     };
-    var requestOptions = {
-      frameId: info.frameId
-    };
       
-    var response;
     response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
     var textForClipboard;
     if (response.success === true) {

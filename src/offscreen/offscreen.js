@@ -68,8 +68,15 @@ async function handleClipboardWrite(payload) {
   return result;
 }
 
+function fixBackground(canvas, color){
+  var context = canvas.getContext('2d');
+  context.fillStyle = color;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 async function handleRenderImage(payload){
   var srcUrl = payload.srcUrl;
+  var backgroundColor = payload.backgroundColor; 
   return new Promise(function(resolve, reject){
     var image = new Image();
     
@@ -77,6 +84,7 @@ async function handleRenderImage(payload){
       var img = event.target;
       var canvas = new OffscreenCanvas(img.width, img.height);
       var context = canvas.getContext('2d');
+      fixBackground(canvas, 'white');
       context.drawImage(img, 0, 0);
       var blob = await canvas.convertToBlob();
       var arrayBuffer = await blob.arrayBuffer();
