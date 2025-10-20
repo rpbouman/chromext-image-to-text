@@ -1,6 +1,6 @@
 {
   "name": "Image-to-Text Contextmenu",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "manifest_version": 3,
   "description": "Context menu item analyzes pictures, charts, graphs & diagrams. Copies description and extracted text and/or data to the clipboard.",
   "icons": {
