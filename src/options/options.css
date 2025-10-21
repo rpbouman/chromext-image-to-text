@@ -53,11 +53,8 @@ body {
           content: ': ';
         }
         
-        > div > img {
-          width: 16px;
-          height: 16px;
-          margin: 2px;
-          vertical-align: bottom;
+        > input#name {
+          width: 30ch;
         }
         
         input:invalid {

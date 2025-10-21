@@ -38,8 +38,7 @@ async function getBaseModel(){
               '- logo, then extract all text. Describe its color, shape and affect. If you can identify a brand, musical band, company or organization, mention its name.',
               '- diagram, then list its elements. Mention their shape (i.e. rectangle, diamond), color and text labels. If the elements are composite (for example, a table with columns) then nest the list and mention those constituent elements as well. Make a separate list of the relationships between the elements, describing the color and style of the lines connecting them (for example, solid, dashed, etc), and the symbol appearing at the ends of the line that connect to the elements (for example, arrowhead) and mentioning any labels that appear to describethe relationshipt. If the diagram as a whole has a title, then this should precedede the description.',
               '- screenshot of a table, excel worksheet, data grid, or if it contains areas that match such things, then return those tables in a format that would allow them to be easily pasted to Excel.',
-              '- graph or chart (i.e a data visualization) then first determine the type of chart, and mention that in the text output. Then identifiy the numbers and units on the axes, and mention them. Then try to identify how any data series are shown, and mention them, describing their color and/or symbol used to plot the data points. Finally, evaluate each series separately, and list each data point, mentioning the values on the respective axes. For continuous graph types like line charts, do it for the smallest tickmarks you can identify along the axes. Make sure the series can be pasted easily to Excel.',
-              //'Regardless of the type of image, assess the possibility the image was made up or fabricated with AI to resemble a genuine image and express that as a percentage. Comment on which features guided that assesment.'
+              '- graph or chart (i.e a data visualization) then first determine the type of chart, and mention that in the text output. Then identifiy the numbers and units on the axes, and mention them. Then try to identify how any data series are shown, and mention them, describing their color and/or symbol used to plot the data points. Finally, evaluate each series separately, and list each data point, mentioning the values on the respective axes. For continuous graph types like line charts, do it for the smallest tickmarks you can identify along the axes. Make sure the series can be pasted easily to Excel.'
             ].join('\r\n')
           }
         ],
@@ -264,7 +263,7 @@ async function imageToText(request){
       progress2: '0',
       output: ''
     });
-    var imageData = await getImageData(request); 
+    var imageData = await getImageData(request.image); 
     if (isCancelled()){
       return;
     }
@@ -284,10 +283,27 @@ async function imageToText(request){
       message: 'Analyzing image',
       progress: '20'
     });
-    var responseStream = await model.promptStreaming([{
+    var multiModalPrompt = [{
       role: 'user',
       content: [{type: 'image', value: imageData}]
-    }]);
+    }];
+
+    var options = {};
+    if (request.userPrompt) {
+      var userPrompt = request.userPrompt;
+      multiModalPrompt[0].content.push({
+        type: 'text',
+        value: userPrompt.userPrompt
+      });
+      if (userPrompt.responseConstraint) {
+        options.responseConstraint = userPrompt.responseConstraint;
+      }
+    }
+    
+    var responseStream = await model.promptStreaming(
+      multiModalPrompt,
+      options
+    );
     if (isCancelled()){
       return;
     }
@@ -444,7 +460,7 @@ function handleMessage(message, sender, sendResponse) {
           srcUrl: srcUrl
         };
         try {
-          var text = await imageToText(message.image);
+          var text = await imageToText(message);
           response.text = text;
           response.success = true;
         }

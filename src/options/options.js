@@ -13,12 +13,14 @@ function updateForm(item){
     }
     
     var value = item[property];
-    if (currentItemFormElement.type === 'file') {
-      var image = document.getElementById('image');
-      if (!value){
-        value = '../images/icon16x16.png';
+    if (currentItemFormElement.name === 'responseConstraint'){
+      if (value){
+        value = JSON.stringify(value, null, 2);
       }
-      image.src = value;
+      else {
+        value = ''
+      }
+      currentItemFormElement.value = value;
     }
     else {
       currentItemFormElement.value = value;
@@ -35,11 +37,12 @@ function getFormData(){
     var currentItemFormElement = currentItemFormElements[element];
     var value;
     switch (currentItemFormElement.tagName) {
-      case 'INPUT':
-        if (currentItemFormElement.type === 'file') {
-          value = document.getElementById('image').src;
+      case 'TEXTAREA': 
+        if (currentItemFormElement.name === 'responseConstraint') {
+          value = JSON.parse(currentItemFormElement.value);
           break;
         }
+      case 'INPUT':
       default:
         value = currentItemFormElement.value;
         break;
@@ -232,13 +235,16 @@ function formChangedHandler(event){
   }
 }
 
+function cloneCurrentClickedHandler(){
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
-document.getElementById('icon').addEventListener('change', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
 
 document.getElementById('addNew').addEventListener('click', addNewClickedHandler);
 document.getElementById('saveCurrent').addEventListener('click', saveCurrentClickedHandler);
+document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
 document.addEventListener('DOMContentLoaded', loadOptions);

@@ -105,6 +105,16 @@ function contextMenuClickHandler(info, tab){
       type: 'image-to-text',
       image: imageData
     };
+
+    var customPromptId = getCustomPromptIdFromContextMenuInfo(info);
+    if (customPromptId) {
+      var customPrompt = await getCustomPrompt(customPromptId);
+      var userPrompt = {
+        userPrompt: customPrompt.prompt,
+        responseConstraint: customPrompt.responseConstraint
+      };
+      request.userPrompt = userPrompt;
+    }
       
     response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
     var textForClipboard;
@@ -150,6 +160,39 @@ function contextMenuFallbackClickHandler(info, tab){
   proxHandler(info, tab);
 }
 
+async function getCustomPrompts(){
+  var prompts = await chrome.storage.local.get('prompts');
+  if (!prompts) {
+    return;
+  }
+  var list = prompts.prompts.list;
+  return list;
+}
+
+async function getCustomPrompt(id){
+  var prompts = await getCustomPrompts();
+  var item = prompts.find(function(prompt){
+    return prompt.id === id;
+  });
+  return item;
+}
+
+function getCustomPromptIdFromContextMenuInfo(contextMenuInfo){
+  var menuItemId = contextMenuInfo.menuItemId;
+  var menuItemIdPrefix = chrome.runtime.id + '_contextmenuitem';
+  if (!menuItemId.startsWith(menuItemIdPrefix)) {
+    throw new Error(`Unexpected Error: expected menu item id prefix ${menuItemIdPrefix}`);
+  }
+  var menuItemIdPostfix = menuItemId.substr(menuItemIdPrefix.length);
+  var customPromptId;
+  if (menuItemIdPostfix.length) {
+    customPromptId = menuItemIdPostfix.substr(1);
+  }
+  return customPromptId;
+}
+  
+
+
 // install the context menu item (only once)
 chrome.runtime.onInstalled.addListener(function(){
   var contextMenuItemId = chrome.runtime.id + '_contextmenuitem';
@@ -157,7 +200,25 @@ chrome.runtime.onInstalled.addListener(function(){
     title: 'Image to text',
     contexts: ['image'],
     id: contextMenuItemId
-  });  
+  });
+  
+  async function addCustomItems(){
+    var prompts = await getCustomPrompts();
+    if (!prompts) {
+      return;
+    }
+    for (var i = 0; i < prompts.length; i++){
+      var item = prompts[i];
+      var contextMenuItemId = chrome.runtime.id + '_contextmenuitem_' + item.id;
+      chrome.contextMenus.create({
+        title: item.name,
+        contexts: ['image'],
+        id: contextMenuItemId
+      });
+    }
+  }
+  addCustomItems();
+  
 });
 
 // register a listener for the context menu.

@@ -54,9 +54,7 @@
         <form id="currentItemForm" data-dirty="false">
           <input id="id" name="id" type="hidden"/>
           <label for="name" placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too.">Name</label>
-          <input id="name" required="true" name="name" type="text"/>
-          <label for="icon">Icon</label>          
-          <div><img id="image"/><input id="icon" name="icon" type="file" accept="image/*" required="true"/></div>
+          <input id="name" required="true" name="name" size="30" type="text"/>
           <label for="prompt">Prompt</label>
           <textarea rows="20" id="prompt" name="prompt" required="true" placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."></textarea>
           <label for="responseConstraint">Response Constraint</label>
