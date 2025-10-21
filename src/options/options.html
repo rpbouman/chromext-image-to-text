@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Image-to-Text Contextmenu - Options</title>
+    <link rel="stylesheet" type="text/css" href="options.css"/> 
+  </head>
+  <body>
+    <template id="sidebarItem">
+      <li>
+        <img />
+        <label></label>
+        <input type="radio" name="itemSelection"/>
+      </li>
+    </template>
+    <main>
+      <header>
+        <menu role="toolbar">
+          <li role="menuitem"><button id="addNew">Add New</button></li>
+        </menu>
+      </header>
+      <nav>
+        <ul id="sidebarItems">
+        </ul>
+      </nav>
+      <section>
+        <header>
+          <menu role="toolbar">
+            <li role="menuitem">
+              <button 
+                id="saveCurrent" 
+                title="Click to save the changes to this custom prompt."
+              >Save</button>
+            </li>
+            <li role="menuitem">
+              <button 
+                id="restoreCurrent" 
+                title="Click undo the unsaved changes and restore this custom prompt."
+              >Restore</button>
+            </li>
+            <li role="menuitem">
+              <button 
+                id="cloneCurrent"
+                title="Click to create a copy of this prompt"
+              >Clone</button>
+            </li>
+            <li role="menuitem">
+              <button 
+                id="deleteCurrent"
+                title="Click to permanently remove the current prompt"
+              >Delete</button>
+            </li>
+          </menu>
+        </header>
+        <form id="currentItemForm" data-dirty="false">
+          <input id="id" name="id" type="hidden"/>
+          <label for="name" placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too.">Name</label>
+          <input id="name" required="true" name="name" type="text"/>
+          <label for="icon">Icon</label>          
+          <div><img id="image"/><input id="icon" name="icon" type="file" accept="image/*" required="true"/></div>
+          <label for="prompt">Prompt</label>
+          <textarea rows="20" id="prompt" name="prompt" required="true" placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."></textarea>
+          <label for="responseConstraint">Response Constraint</label>
+          <textarea rows="20" id="responseConstraint" name="responseConstraint" placeholder="Optionally, provide s JSON schema to control the structure and content of the response."></textarea>
+        </form>
+        <footer>
+        </footer>
+      </section>
+    </main>
+    <script src="options.js"></script>
+  </body>
+</html>
