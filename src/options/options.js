@@ -39,7 +39,13 @@ function getFormData(){
     switch (currentItemFormElement.tagName) {
       case 'TEXTAREA': 
         if (currentItemFormElement.name === 'responseConstraint') {
-          value = JSON.parse(currentItemFormElement.value);
+          value = currentItemFormElement.value.trim();
+          if (value.length) {
+            value = JSON.parse(currentItemFormElement.value);
+          }
+          else {
+            value = undefined;
+          }
           break;
         }
       case 'INPUT':
@@ -79,10 +85,7 @@ function updateCurrentSidebarItemFromForm(){
   var sidebarItem = getCurrentSidebarItem();
   var currentItemForm = document.getElementById('currentItemForm');
   sidebarItem.querySelector('label').textContent = currentItemForm['name'].value;
-  var iconSrc = currentItemForm.querySelector('img').src;
-  if (!iconSrc){
-    iconSrc = '../images/icon16x16.png';
-  }
+  var iconSrc = '../images/icon16x16.png';
   sidebarItem.querySelector('img').src = iconSrc;
 }
 
@@ -117,15 +120,17 @@ function addSidebarItem(promptInfo) {
 }
 
 async function getPromptsFromStorage(){
+  var needsStorage = false;
   var prompts = await chrome.storage.local.get('prompts');
-  if (!prompts) {
-    prompts = {
-      list: []
-    };
+  if (!prompts.prompts){
+    prompts.prompts = {};
+    needsStorage = true;
   }
-  else 
   if (!prompts.prompts.list){
     prompts.prompts.list = [];
+    needsStorage = true;
+  }
+  if (needsStorage){
     await chrome.storage.local.set(prompts);
   }
   var list = prompts.prompts.list;
@@ -133,11 +138,14 @@ async function getPromptsFromStorage(){
 }
 
 async function storePromptsToStorage(prompts){
-  return await chrome.storage.local.set({
+  await chrome.storage.local.set({
     prompts: {
       list: prompts
     }
-  });  
+  });
+  await chrome.runtime.sendMessage({
+    type: 'create-context-menus'
+  });
 }
 
 async function loadOptions(event){
@@ -238,6 +246,88 @@ function formChangedHandler(event){
 function cloneCurrentClickedHandler(){
 }
 
+var baseModel = undefined;
+async function getBaseModel(){
+  if (baseModel) {
+    return baseModel;
+  }
+  if (typeof LanguageModel === 'undefined'){
+    alert([
+      `LanguageModel API not defined!`,
+      `Be sure to enable the chrome://flags/#prompt-api-for-gemini-nano flag.`
+    ].join('\r\n'));
+    return undefined;
+  }
+  var availability = await LanguageModel.availability();
+  if (availability === 'unavailable') {
+    alert([
+      `LanguageModel API is defined, but the model is not available!`
+    ].join('\r\n'));
+    return undefined;
+  }
+  baseModel = await LanguageModel.create({
+    initialPrompts: [
+      {
+        role: 'system', 
+        content: [
+          'You are an expert at analyzing natural language descriptions of image processing and analysis requirements.',
+          'You will analyze the user\'s requirements and respond by writing a JSON schema that describes the structure and content of the image analysis as described by the user.',
+          'If the user input does not appear to give any specific clues that have to do with image processing, then suggest a generic JSON schema that captures common attribtes that may be applicable to images.'
+        ].join('\r\n')
+      }
+    ],
+    monitor(m){
+      m.addEventListener('downloadprogress', function(e){
+        var progress = e.loaded;
+        var busy = progress === 1 ? false : true;
+        document.getElementById('generateJsonSchema').setAttribute('aria-busy', busy);
+        progress = Math.round(progress * 100);
+        var downloadProgressElement = document.getElementById('dowloadProgress');
+        downloadProgressElement = progress + '%';
+      });
+    }
+  });
+  return baseModel;
+}
+
+async function getModel(){
+  var baseModel = await getBaseModel();
+  var clone = await baseModel.clone();
+  return clone;
+}
+
+async function generateJsonSchemaClickedHandler(event){
+  var model = await getModel();
+  var promptElement = document.getElementById('prompt');
+  var promptText = promptElement.value;
+  promptText = promptText.trim();
+  if (!promptText.length) {
+    promptText = [
+      `Write a JSON schema that captures generic aspects of image data uploaded by the user.`,
+      `Aspects may extend into various domains:`,
+      `- purely technical (pixel dimensions, color model, image format etc)`,
+      `- categorical and semi-exact, like image type (illustration, photo, diagram, etc), picture size (small, medium, large), artistic genre`, 
+      `- semantical, like whether it is a cartoon, an informative illustration or a realistic representation of reality`,
+      `Keep in mind that you only have image data. Don't design attributes that require metadata that cannot be extracted or derived from the image data itself.`,
+      `For example, path or url of the source of the picture is something you generally cannot derive from the image data itself.`,
+      `Try to capture these in properties of which the values can be meaningfully enumerated in a not too long list of possible values`,
+      `Prefer to define attributes as required`
+    ].join('\r\n');
+  }
+
+  var responseConstraintElement = document.getElementById('responseConstraint');
+  responseConstraintElement.value = '';
+  var responseStream = await model.promptStreaming([{
+    role: 'user',
+    content: promptText
+  }]);
+  var response = '';
+  for await (var chunk of responseStream) {
+    response += chunk;
+    responseConstraintElement.value = response;
+  }
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
@@ -247,4 +337,5 @@ document.getElementById('saveCurrent').addEventListener('click', saveCurrentClic
 document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
+document.getElementById('generateJsonSchema').addEventListener('click', generateJsonSchemaClickedHandler);
 document.addEventListener('DOMContentLoaded', loadOptions);

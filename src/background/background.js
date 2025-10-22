@@ -162,7 +162,7 @@ function contextMenuFallbackClickHandler(info, tab){
 
 async function getCustomPrompts(){
   var prompts = await chrome.storage.local.get('prompts');
-  if (!prompts) {
+  if (!prompts || !prompts.prompts || !prompts.prompts.list) {
     return;
   }
   var list = prompts.prompts.list;
@@ -191,34 +191,55 @@ function getCustomPromptIdFromContextMenuInfo(contextMenuInfo){
   return customPromptId;
 }
   
-
-
-// install the context menu item (only once)
-chrome.runtime.onInstalled.addListener(function(){
+async function createContextMenus(){
+  chrome.contextMenus.removeAll();
+  
   var contextMenuItemId = chrome.runtime.id + '_contextmenuitem';
   chrome.contextMenus.create({
     title: 'Image to text',
     contexts: ['image'],
     id: contextMenuItemId
   });
-  
-  async function addCustomItems(){
-    var prompts = await getCustomPrompts();
-    if (!prompts) {
-      return;
-    }
-    for (var i = 0; i < prompts.length; i++){
-      var item = prompts[i];
-      var contextMenuItemId = chrome.runtime.id + '_contextmenuitem_' + item.id;
-      chrome.contextMenus.create({
-        title: item.name,
-        contexts: ['image'],
-        id: contextMenuItemId
-      });
-    }
+
+  var prompts = await getCustomPrompts();
+  if (!prompts) {
+    return;
   }
-  addCustomItems();
-  
+  for (var i = 0; i < prompts.length; i++){
+    var item = prompts[i];
+    var contextMenuItemId = chrome.runtime.id + '_contextmenuitem_' + item.id;
+    chrome.contextMenus.create({
+      title: item.name,
+      contexts: ['image'],
+      id: contextMenuItemId
+    });
+  }
+}
+
+function handleMessage(message, sender, sendResponse){
+  var response = {
+    type: message.type
+  };
+  switch (message.type){
+    case 'create-context-menus':
+      createContextMenus()
+      .then(function(){
+        response.success = true;
+        sendResponse(response);
+      })
+      .catch(function(e){
+        response.error = e;
+        sendResponse(response);
+      });
+      return;
+    default:
+  }
+  sendResponse(response);
+}
+
+// install the context menu item (only once)
+chrome.runtime.onInstalled.addListener(function(){
+  createContextMenus();
 });
 
 // register a listener for the context menu.
@@ -234,4 +255,5 @@ chrome.contextMenus.onClicked.addListener(
   : contextMenuClickHandler
 );
 
+chrome.runtime.onMessage.addListener(handleMessage);
 

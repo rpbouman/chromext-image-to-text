@@ -49,7 +49,7 @@ async function getBaseModel(){
             })
           })
         }
-      });      
+      });
     }
   }
   catch(e) {
@@ -330,7 +330,7 @@ async function imageToText(request){
         progress2: progress2
       });
       if (isCancelled()){
-        mesage += '\r\n\r\nABORTED AT USER REQUEST';
+        message += '\r\n\r\nABORTED AT USER REQUEST';
         return message;
       }
     }
