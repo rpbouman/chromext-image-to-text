@@ -25,7 +25,7 @@
         <h1>Getting started with custom Image-to-Text prompts</h1>
         <p>
           Looks like you don't have any custom Image-to-Text Contextmenu prompts yet.
-          Just click <label for="addNew">Add New</label> to get started. 
+          Just click <label for="addNew">Add New</label> to get started!
         </p>
       </section>
       <section id="noPromptSelected">
@@ -73,13 +73,17 @@
           <label for="name" placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too.">Name</label>
           <input id="name" required="true" name="name" size="30" type="text"/>
           <label for="prompt">Prompt</label>
-          <textarea rows="10" id="prompt" name="prompt" required="true" placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."></textarea>
+          <textarea rows="10" id="prompt" name="prompt" placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."></textarea>
           <label for="responseConstraint">Response Constraint</label>
           <textarea rows="20" id="responseConstraint" name="responseConstraint" placeholder="Optionally, provide s JSON schema to control the structure and content of the response."></textarea>
           <label></label>
           <menu role="toolbar">
             <li>
-              <button type="button" id="generateJsonSchema">Generate JSON Schema...</button>
+              <button 
+                type="button" 
+                id="generateJsonSchema"
+                title="Click this to generate a new JSON schema based on the current prompt text. The generated schema is just a suggestion: you can always change either the prompt or the JSON schema later on."
+              >Generate JSON Schema...</button>
             </li>
             <li>
               <output id="dowloadProgress"></output>

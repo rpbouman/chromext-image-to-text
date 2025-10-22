@@ -118,22 +118,27 @@ function contextMenuClickHandler(info, tab){
       
     response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
     var textForClipboard;
-    if (response.success === true) {
-      textForClipboard = [
-        'Page: ' + tab.url,
-        'Image: ' + imageSrcUrl,
-        '',
-        response.text
-      ].join('\r\n');
+    if (response){
+      if (response.success === true) {
+        textForClipboard = [
+          'Page: ' + tab.url,
+          'Image: ' + imageSrcUrl,
+          '',
+          response.text
+        ].join('\r\n');
+      }
+      else {
+        textForClipboard = [
+          'Page: ' + tab.url,
+          'Image: ' + imageSrcUrl,
+          '',
+          'Error: ' + response.errorType,
+          'Message: ' + response.errorMessage
+        ].join('\r\n');
+      }
     }
     else {
-      textForClipboard = [
-        'Page: ' + tab.url,
-        'Image: ' + imageSrcUrl,
-        '',
-        'Error: ' + response.errorType,
-        'Message: ' + response.errorMessage
-      ].join('\r\n');
+      textForClipboard = `Request did not return a reponse! This is probably due to some iternal error. Sorry!`
     }
     copyToClipboard({
       text: textForClipboard

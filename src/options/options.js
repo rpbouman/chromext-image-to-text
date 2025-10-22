@@ -164,14 +164,31 @@ async function loadOptions(event){
   }
 }
 
+function getNewItemId(){
+  return crypto.randomUUID();
+}
+
 async function addNewClickedHandler(event){
   var newItem = {
-    id: crypto.randomUUID(),
+    id: getNewItemId(),
     name: 'New prompt',
     icon: '',
     prompt: '',
     responseConstraint: ''
   };
+  await addNewItem(newItem);
+}
+
+async function cloneCurrentClickedHandler(){
+  var id = getCurrentItemId();
+  var item = await getItem(id);
+  var newItem = Object.assign({}, item, {
+    id: getNewItemId()
+  });
+  await addNewItem(newItem);
+}
+
+async function addNewItem(newItem){
   var prompts = await getPromptsFromStorage();
   prompts.push(newItem);
   await storePromptsToStorage(prompts);
@@ -247,9 +264,6 @@ function formChangedHandler(event){
   }
 }
 
-function cloneCurrentClickedHandler(){
-}
-
 var baseModel = undefined;
 async function getBaseModel(){
   if (baseModel) {
@@ -276,7 +290,8 @@ async function getBaseModel(){
         content: [
           'You are an expert at analyzing natural language descriptions of image processing and analysis requirements.',
           'You will analyze the user\'s requirements and respond by writing a JSON schema that describes the structure and content of the image analysis as described by the user.',
-          'If the user input does not appear to give any specific clues that have to do with image processing, then suggest a generic JSON schema that captures common attribtes that may be applicable to images.'
+          'If the user input does not appear to give any specific clues that have to do with image processing, then suggest a generic JSON schema that captures common attribtes that may be applicable to images.',
+          'Respond with the JSON schema and only the JSON schema. Do not describe, explain or makrup the schema. Do not wrap the schema in markdown. Just output bare JSON.'
         ].join('\r\n')
       }
     ],
@@ -329,6 +344,7 @@ async function generateJsonSchemaClickedHandler(event){
   for await (var chunk of responseStream) {
     response += chunk;
     responseConstraintElement.value = response;
+    responseConstraintElement.scrollTop = responseConstraintElement.scrollHeight;
   }
 }
 
