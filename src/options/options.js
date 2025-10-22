@@ -100,7 +100,7 @@ function instantiateSidebarItem(id){
   return sidebarItem;
 }
 
-function addSidebarItem(promptInfo) {
+function addSidebarItem(promptInfo, selected) {
   var sidebarItems = getSidebarItems();
   var sidebarItem = instantiateSidebarItem(promptInfo.id);
   sidebarItems.appendChild(sidebarItem);
@@ -115,6 +115,13 @@ function addSidebarItem(promptInfo) {
     src = '../images/icon16x16.png';
   }
   icon.src = src;
+  
+  if (selected === true) {
+    sidebarItem.querySelector('input[type=radio]').click();
+    updateForm();
+    document.getElementById('name').select();
+    document.getElementById('name').focus();
+  }
   
   return sidebarItem;
 }
@@ -150,6 +157,7 @@ async function storePromptsToStorage(prompts){
 
 async function loadOptions(event){
   var prompts = await getPromptsFromStorage();
+  var firstSidebarItem;
   for (var i = 0; i < prompts.length; i++){
     var promptInfo = prompts[i];
     addSidebarItem(promptInfo);
@@ -167,11 +175,7 @@ async function addNewClickedHandler(event){
   var prompts = await getPromptsFromStorage();
   prompts.push(newItem);
   await storePromptsToStorage(prompts);
-  var sidebarItem = addSidebarItem(newItem);
-  sidebarItem.querySelector('input[type=radio]').click();
-  updateForm();
-  document.getElementById('name').select();
-  document.getElementById('name').focus();
+  addSidebarItem(newItem, true);
 }
 
 async function findItemIndex(id){
