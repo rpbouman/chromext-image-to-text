@@ -14,13 +14,8 @@ function updateForm(item){
     
     var value = item[property];
     if (currentItemFormElement.name === 'responseConstraint'){
-      if (value){
-        value = JSON.stringify(value, null, 2);
-      }
-      else {
-        value = ''
-      }
       currentItemFormElement.value = value;
+      validateResponseConstraint(currentItemFormElement);
     }
     else {
       currentItemFormElement.value = value;
@@ -250,6 +245,21 @@ function setFormStateDirty(state){
   currentItemForm.setAttribute('data-dirty', Boolean(state));  
 }
 
+function validateResponseConstraint(textarea){
+  var value = textarea.value;
+  value = value.trim();
+  var validityState = '';
+  if (value.length) {
+    try {
+      var jso = JSON.parse(value);
+    }
+    catch (e) {
+      validityState = e.message;
+    }
+  }
+  textarea.setCustomValidity(validityState);
+}
+
 function formChangedHandler(event){
   setFormStateDirty(true);
   
@@ -259,6 +269,9 @@ function formChangedHandler(event){
     case 'name':
     case 'id':
       updateCurrentSidebarItemFromForm();
+      break;
+    case 'responseConstraint':
+      validateResponseConstraint(target);
       break;
     default:
   }
@@ -339,13 +352,18 @@ async function generateJsonSchemaClickedHandler(event){
   var responseStream = await model.promptStreaming([{
     role: 'user',
     content: promptText
-  }]);
+  }], {
+    responseConstraint: {
+      "type": "object"
+    }
+  });
   var response = '';
   for await (var chunk of responseStream) {
     response += chunk;
     responseConstraintElement.value = response;
     responseConstraintElement.scrollTop = responseConstraintElement.scrollHeight;
   }
+  validateResponseConstraint(responseConstraintElement);
 }
 
 document.getElementById('name').addEventListener('input', formChangedHandler);

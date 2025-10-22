@@ -70,12 +70,41 @@
         </header>
         <form id="currentItemForm" data-dirty="false">
           <input id="id" name="id" type="hidden"/>
-          <label for="name" placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too.">Name</label>
-          <input id="name" required="true" name="name" size="30" type="text"/>
-          <label for="prompt">Prompt</label>
-          <textarea rows="10" id="prompt" name="prompt" placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."></textarea>
-          <label for="responseConstraint">Response Constraint</label>
-          <textarea rows="20" id="responseConstraint" name="responseConstraint" placeholder="Optionally, provide s JSON schema to control the structure and content of the response."></textarea>
+          <label 
+            for="name" 
+            placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too."
+            title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
+          >Name</label>
+          <input 
+            id="name" 
+            name="name" 
+            size="30" 
+            type="text"
+            required="true"
+            title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
+          />
+          <label 
+            for="prompt"
+            title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
+          >Prompt</label>
+          <textarea 
+            rows="10" 
+            id="prompt" 
+            name="prompt" 
+            placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."
+            title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
+          ></textarea>
+          <label 
+            for="responseConstraint"
+            title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
+          >Response Constraint</label>
+          <textarea 
+            rows="20" 
+            id="responseConstraint" 
+            name="responseConstraint" 
+            placeholder="Optionally, provide s JSON schema to control the structure and content of the response."
+            title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
+          ></textarea>
           <label></label>
           <menu role="toolbar">
             <li>

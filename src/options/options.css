@@ -70,7 +70,8 @@ body {
           width: 30ch;
         }
         
-        input:invalid {
+        input:invalid,
+        textarea:invalid {
           background-color: red;
           color: white;
         }
@@ -91,7 +92,7 @@ body {
       }
     }
 
-    > section:has( > form#currentItemForm > input:invalid ){
+    > section:has( > form#currentItemForm > *:invalid ){
       > header {
         > menu {
           > li {

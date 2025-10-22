@@ -115,8 +115,22 @@ function contextMenuClickHandler(info, tab){
       };
       request.userPrompt = userPrompt;
     }
-      
-    response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
+
+    try {
+      response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
+    }
+    catch(e){
+      await chrome.tabs.sendMessage(tab.id, {
+        type: 'alert',
+        text: [
+          'Error analyzing the image: ',
+          '',
+          `${e.name}: ${e.message}`
+        ].join('\r\n')
+      });
+      return;
+    }
+
     var textForClipboard;
     if (response){
       if (response.success === true) {
@@ -140,9 +154,23 @@ function contextMenuClickHandler(info, tab){
     else {
       textForClipboard = `Request did not return a reponse! This is probably due to some iternal error. Sorry!`
     }
-    copyToClipboard({
-      text: textForClipboard
-    });
+
+    try {
+      copyToClipboard({
+        text: textForClipboard
+      });
+    }
+    catch(e){
+      await chrome.tabs.sendMessage(tab.id, {
+        type: 'alert',
+        text: [
+          'Error copying to clipboard: ',
+          '',
+          `${e.name}: ${e.message}`
+        ].join('\r\n')
+      });
+      return;
+    }
   }
   proxyHandler(info, tab);
 }
