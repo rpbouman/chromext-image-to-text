@@ -105,6 +105,16 @@ function contextMenuClickHandler(info, tab){
       type: 'image-to-text',
       image: imageData
     };
+
+    var customPromptId = getCustomPromptIdFromContextMenuInfo(info);
+    if (customPromptId) {
+      var customPrompt = await getCustomPrompt(customPromptId);
+      var userPrompt = {
+        userPrompt: customPrompt.prompt,
+        responseConstraint: customPrompt.responseConstraint
+      };
+      request.userPrompt = userPrompt;
+    }
       
     response = await chrome.tabs.sendMessage(tab.id, request, requestOptions);
     var textForClipboard;
@@ -150,14 +160,86 @@ function contextMenuFallbackClickHandler(info, tab){
   proxHandler(info, tab);
 }
 
-// install the context menu item (only once)
-chrome.runtime.onInstalled.addListener(function(){
+async function getCustomPrompts(){
+  var prompts = await chrome.storage.local.get('prompts');
+  if (!prompts || !prompts.prompts || !prompts.prompts.list) {
+    return;
+  }
+  var list = prompts.prompts.list;
+  return list;
+}
+
+async function getCustomPrompt(id){
+  var prompts = await getCustomPrompts();
+  var item = prompts.find(function(prompt){
+    return prompt.id === id;
+  });
+  return item;
+}
+
+function getCustomPromptIdFromContextMenuInfo(contextMenuInfo){
+  var menuItemId = contextMenuInfo.menuItemId;
+  var menuItemIdPrefix = chrome.runtime.id + '_contextmenuitem';
+  if (!menuItemId.startsWith(menuItemIdPrefix)) {
+    throw new Error(`Unexpected Error: expected menu item id prefix ${menuItemIdPrefix}`);
+  }
+  var menuItemIdPostfix = menuItemId.substr(menuItemIdPrefix.length);
+  var customPromptId;
+  if (menuItemIdPostfix.length) {
+    customPromptId = menuItemIdPostfix.substr(1);
+  }
+  return customPromptId;
+}
+  
+async function createContextMenus(){
+  chrome.contextMenus.removeAll();
+  
   var contextMenuItemId = chrome.runtime.id + '_contextmenuitem';
   chrome.contextMenus.create({
     title: 'Image to text',
     contexts: ['image'],
     id: contextMenuItemId
-  });  
+  });
+
+  var prompts = await getCustomPrompts();
+  if (!prompts) {
+    return;
+  }
+  for (var i = 0; i < prompts.length; i++){
+    var item = prompts[i];
+    var contextMenuItemId = chrome.runtime.id + '_contextmenuitem_' + item.id;
+    chrome.contextMenus.create({
+      title: item.name,
+      contexts: ['image'],
+      id: contextMenuItemId
+    });
+  }
+}
+
+function handleMessage(message, sender, sendResponse){
+  var response = {
+    type: message.type
+  };
+  switch (message.type){
+    case 'create-context-menus':
+      createContextMenus()
+      .then(function(){
+        response.success = true;
+        sendResponse(response);
+      })
+      .catch(function(e){
+        response.error = e;
+        sendResponse(response);
+      });
+      return;
+    default:
+  }
+  sendResponse(response);
+}
+
+// install the context menu item (only once)
+chrome.runtime.onInstalled.addListener(function(){
+  createContextMenus();
 });
 
 // register a listener for the context menu.
@@ -173,4 +255,5 @@ chrome.contextMenus.onClicked.addListener(
   : contextMenuClickHandler
 );
 
+chrome.runtime.onMessage.addListener(handleMessage);
 

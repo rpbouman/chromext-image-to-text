@@ -29,7 +29,8 @@
   "permissions": [
     "clipboardWrite",
     "contextMenus",
-    "offscreen"
+    "offscreen",
+    "storage"
   ],
   "host_permissions": [
     "*://*/*",
@@ -45,5 +46,6 @@
   ],
   "background": {
     "service_worker": "background/background.js"
-  }  
+  },
+  "options_page": "options/options.html"
 }
