@@ -7,6 +7,7 @@ In addition to the generic Image-to-Text option, you can also create and maintai
 
 <img width="1280" height="717" alt="image" src="https://github.com/user-attachments/assets/360f04a1-1526-4ae5-bbaf-c0826570354e" />
 
+To see it in action, checkout this demo video on Youtube: https://www.youtube.com/watch?v=0w4jdvy7ZAg
 
 ## Installation
 
