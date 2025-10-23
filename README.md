@@ -3,6 +3,10 @@
 
 <img width="1280" height="800" alt="image-to-text" src="https://github.com/user-attachments/assets/15b05848-6811-484f-9bb8-fb17671670db" />
 
+In addition to the generic Image-to-Text option, you can also create and maintain your own custom prompts from the extension's option page. These will be persisted and appear as subitems of the Image-to-Text contextmenu:
+<img width="1280" height="717" alt="image" src="https://github.com/user-attachments/assets/360f04a1-1526-4ae5-bbaf-c0826570354e" />
+
+
 ## Installation
 
 You can either install this plugin from a local copy of this repository, or you can [get it from the Chrome Web store](https://chromewebstore.google.com/detail/ffalgjfbpcafmoggapmobefdhgbkmang?utm_source=item-share-cb).
