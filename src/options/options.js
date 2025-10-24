@@ -366,11 +366,47 @@ async function generateJsonSchemaClickedHandler(event){
   validateResponseConstraint(responseConstraintElement);
 }
 
+function downloadURL(url, fileName) {
+  var a;
+  a = document.createElement('a');
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.style = 'display: none';
+  a.click();
+  a.remove();
+}
+
+function downloadBlob(data, fileName, mimeType, timeout) {
+  var blob, url;
+  blob = new Blob(
+    [data]
+  , {type: mimeType}
+  );
+  url = window.URL.createObjectURL(blob);
+  downloadURL(url, fileName);
+  timeout = timeout === undefined ? 1000 : timeout;
+  setTimeout(function() {
+    return window.URL.revokeObjectURL(url);
+  }, timeout);
+}
+
+async function exportPromptsClickedHandler(event){
+  var prompts = await getPromptsFromStorage();
+  var json = JSON.stringify(prompts, null, 2);
+  downloadBlob(json, 'image-to-text-prompts.json', 'application/json');
+}
+
+async function importPromptsClickedHandler(event){
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
 
 document.getElementById('addNew').addEventListener('click', addNewClickedHandler);
+document.getElementById('exportPrompts').addEventListener('click', exportPromptsClickedHandler);
+document.getElementById('importPrompts').addEventListener('click', importPromptsClickedHandler);
 document.getElementById('saveCurrent').addEventListener('click', saveCurrentClickedHandler);
 document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
