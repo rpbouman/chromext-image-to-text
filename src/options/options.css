@@ -220,6 +220,11 @@ body {
     > section#editPromptUi {
       display: none;
     }
+
+    > header > menu > li > button#exportPrompts {
+      color: GrayText;
+      pointer-events: none;
+    }
   }
   
   > main:has( > nav > ul#sidebarItems:not( > li ) ) {
@@ -232,6 +237,7 @@ body {
     > section#editPromptUi {
       display: none;
     }
+
   }
 
   > main:has( > nav > ul#sidebarItems > li  ) {
