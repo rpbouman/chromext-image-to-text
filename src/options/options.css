@@ -1,0 +1,285 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+header {
+  grid-row: 1;
+  grid-column: 1/3;
+  border-bottom-style: solid;
+  border-bottom-width: 1px;
+  border-bottom-color: rgb(200,200,200);
+  
+  > menu[role=toolbar] {
+
+    font-family: system-ui !important;      
+    margin-block-start: 2px;
+    margin-block-end: 2px;
+    padding-inline-start: 2px;
+
+    > li[role=menuitem] {
+      display: inline-block;
+      list-style: none;
+      
+      > input#importPromptsFile {
+        display: none;
+      }
+    }
+  }
+}
+
+
+body {
+    
+  > main {
+    
+    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 99fr;
+    grid-template-rows: 1fr 98fr 1fr;
+    
+    > section#editPromptUi {
+      font-family: system-ui !important;      
+    }
+
+    > section#gettingStarted,
+    > section#noPromptSelected {
+      font-family: sans-serif;
+      font-size: 16px;
+    }
+    
+    > section {
+      padding-left: .5em;
+      overflow-y: scroll;
+      
+      > header {
+        position: fixed;
+        background: white;
+      }
+      
+      > form {
+        margin-top: 2em;
+        display: grid;
+        grid-template-columns: [labels] auto [controls] 1fr;
+        grid-auto-flow: row;
+        grid-gap: 0.25em;
+        padding-top: 0.75em;
+        
+        > label::after {
+          content: ': ';
+        }
+        
+        > input#name {
+          width: 30ch;
+        }
+        
+        > textarea {
+          resize: vertical;
+        }
+        
+        > input:invalid,
+        > textarea:invalid {
+          background-color: red;
+          color: white;
+        }
+        
+        > menu[role=toolbar] {
+          list-style: none;
+          
+          margin-block-start: 0px;
+          margin-block-end: 0px;
+          padding-inline-start: 0px;
+          display: inline-flex;
+          
+          > li {
+            > button {
+            }
+          }
+        }
+      }
+    }
+
+    > section:has( > form#currentItemForm > *:invalid ){
+      > header {
+        > menu {
+          > li {
+            
+            > button#saveCurrent {
+              pointer-events: none;
+              color: GrayText;
+            }
+          }
+        }
+      }
+    }
+
+    > section:has( > form#currentItemForm[data-dirty=false] ) {
+      > header {
+        > menu {
+          > li {
+            
+            > button#saveCurrent,
+            > button#restoreCurrent {
+              pointer-events: none;
+              color: GrayText;
+            }
+            
+          }
+        }
+      }
+    }
+    
+    > section:has( > form#currentItemForm[data-dirty=true] ) {
+      > header {
+        > menu {
+          > li {
+            
+            
+            > button#cloneCurrent {
+              pointer-events: none;
+              color: GrayText;
+            }
+            
+          }
+        }
+      }
+    }
+
+    > footer {
+      font-family: system-ui !important;      
+      grid-row: 3;
+      grid-column: 1/3;
+      border-top-style: solid;
+      border-top-width: 1px;
+      border-top-color: rgb(200,200,200);
+    }
+
+    > nav {
+      font-family: system-ui !important;
+      grid-row: 2;
+      grid-column: 1/2;
+      min-width: 200px;
+      width: 300px;
+      overflow: hidden;
+      resize: horizontal;
+      border-right-style: solid;
+      border-right-width: 1px;
+      border-right-color: rgb(200,200,200);
+      
+      > ul#sidebarItems {
+        
+        padding-block-start: 0em;
+        padding-block-end: 0em;
+        padding-inline-start: 1em;
+        list-style-type: none;
+        
+        > li {
+  
+          > img {
+            display: inline-block;
+            margin: 2px;
+            width: 16px;
+            height: 16px;
+          }
+
+          > label {
+            display: inline-block;
+            width: calc( 100% - 32px );
+            vertical-align: top;
+            margin-top: 2px;
+          }
+          
+          > input[type=radio] {
+            appearance: none;
+            display: none;
+          }
+        }
+        
+        > li:has( > input[type=radio]:checked ) {
+          background-color: Highlight;
+          color: HighlightText;
+        }
+        
+        > li:hover {
+          background-color: Highlight;
+          color: HighlightText;
+        }
+      }
+      
+    }    
+  }
+
+  label[for=addNew] {
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  
+  /* if there are no custom promtps at all, you get the getting started screen */
+  > main:has( > nav > ul#sidebarItems:empty ) {
+    
+    > section#gettingStarted {
+      display: block;
+    }
+
+    > section#noPromptSelected,
+    > section#editPromptUi {
+      display: none;
+    }
+
+    > header > menu > li > button#exportPrompts {
+      color: GrayText;
+      pointer-events: none;
+    }
+  }
+  
+  > main:has( > nav > ul#sidebarItems:not( > li ) ) {
+    
+    > section#gettingStarted {
+      display: block;
+    }
+
+    > section#noPromptSelected,
+    > section#editPromptUi {
+      display: none;
+    }
+
+  }
+
+  > main:has( > nav > ul#sidebarItems > li  ) {
+
+    > section#noPromptSelected {
+      display: block;
+    }
+
+    > section#gettingStarted,
+    > section#editPromptUi {
+      display: none;
+    }    
+  }
+  
+  /* if a custom prompt is selected, we get to edit it */
+  > main:has( > nav > ul#sidebarItems > li > input[type=radio][name=itemSelection]:checked ) {
+    > section#editPromptUi {
+      display: unset;
+    }
+
+    > section#gettingStarted,
+    > section#noPromptSelected {
+      display: none;
+    }
+  }
+
+
+  /* 
+    if the currently select prompt has been edited, we cannot select another one. 
+    the user needs to either save or restore to continue with something else.
+  */
+  > main:has( > section#editPromptUi > form#currentItemForm[data-dirty=true] ) {
+    > nav {
+      pointer-events: none;
+    }
+  }
+}

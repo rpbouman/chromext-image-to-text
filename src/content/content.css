@@ -6,42 +6,65 @@ body {
   > dialog.image-to-text {
     
     overflow: hidden;
-    width: 200px;
-    min-width: 200px;
-    max-width: 200px;
-    height: 120px;
-    min-height: 120px;
-    max-height: 120px;
+    width: 240px;
+    min-width: 240px;
+    max-width: 240px;
+    height: 115px;
+    min-height: 115px;
+    max-height: 115px;
     
-    font-family: system-ui;
+    font-family: system-ui !important;
     border-width: 1px;
     border-radius: .5em;
     padding: 4px;
     
     > header {
+      all: revert;      
+    }
+
+    > header {
     
+      padding: 0em .2em .1em .2em;
+      border-top-left-radius: .3em;
+      border-top-right-radius: .3em;
       top: 0px;
+      background-color: Highlight;
+      color: HighlightText;
+      font-size: 16px;
       
       > img {
         margin-right: 4px;
+        margin-top: 2px;
+        vertical-align: top;
+        display: inline-block !important;
       }
-    
+
       > span {
-        font-weight: bold;
+        vertical-align: top;
       }
-                  
+      
+      > span:has( + a[href] )::after {
+        content: ' | ';
+      }        
+      
+      > a {
+        color: rgb(255, 200, 200);
+        vertical-align: top;
+      }
+                            
     }
     
-    > header::after {
-      content: 'Image to Text ';
-    }
-            
     > section {
+      all: revert;
+    }
+
+    > section {
+      
+      font-size: 14px;
       
       height: calc( 100% - 45px );
       
       > span {
-        font-size: smaller;
         display: block;
         width: 100%;
         overflow: hidden;
@@ -58,19 +81,32 @@ body {
       }
       
     }
+
+    > footer {
+      all: revert;
+    }
     
     > footer {
       bottom: 0px;
       text-align: center;
       
       > button {
-      }
-
-      > button::before {
-        font-family: system-ui;
-        content: "Ok";
+        all: revert;
       }
       
+      > button {
+        border-radius: .5em;
+        font-family: system-ui;
+      }
     }
   }
+ 
+  > dialog.image-to-text:not( [data-image-to-text-state=ready] ) > footer > button[name=okButton] {
+    display: none;
+  }
+
+  > dialog.image-to-text[data-image-to-text-state=ready] > footer > button[name=cancelButton] {
+    display: none;
+  }
+  
 }

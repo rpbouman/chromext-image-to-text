@@ -1,0 +1,5 @@
+{
+  "id": "8b792dc4-8569-4703-b49c-ecc4539e85e6",
+  "name": "Diagram to Mermaid",
+  "prompt": "The image represents a diagram. Generate Mermaid code to recreate it. \n\nFirst, determine the diagram type. Choose most appropriate diagram type known to Mermaid from this list:\n- flowchart\n- sequenceDiagram\n- classDiagram\n- stateDiagram\n- erDiagram\n- requirementDiagram\n- gitGraph\n- mindmap\n\nNext, analyze the contents of the diagram:\n- Analyze all its elements.\n- Find all relationships connecting the elements to each other.\n- Extract any labels associated with the elements and relationships\n\nTransform the extracted information into valid Mermaid code so that it would recreates the diagram depicted in the image.\n\nDo not explain the analysis. Just output the mermaid code. "
+}
