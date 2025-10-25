@@ -1,0 +1,5 @@
+{
+  "id": "11e45f7f-7879-4fde-b318-7cf0227d7317",
+  "name": "ERD to SQL",
+  "prompt": "The image is an Entity-Relationship Diagram or RDBMS Data Model. Analyze the diagram and find all entities. Look for columns in the entities and determine their data type, nullability, and whether they column is a primary key column. Also identify any lines connecting the entities which indicate relationships\n\nGenerate a SQL CREATE TABLE statement for each entity. For the column definitions use whatever data type information you extract from the diagram. If the column appears to be not nullable, then include an inline NOT NULL column constraint. If the diagram includes key information, then include an inline PRIMARY KEY constraint in the CREATE TABLE statement. For each relationship, include a FOREIGN KEY definition inside the CREATE TALBE statement of the referencing table.\n\nDon't explain the analysis, just output 1 SQL block with the generated CREATE TABLE statements."
+}
