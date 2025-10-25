@@ -21,6 +21,10 @@ header {
     > li[role=menuitem] {
       display: inline-block;
       list-style: none;
+      
+      > input#importPromptsFile {
+        display: none;
+      }
     }
   }
 }
@@ -70,8 +74,12 @@ body {
           width: 30ch;
         }
         
-        input:invalid,
-        textarea:invalid {
+        > textarea {
+          resize: vertical;
+        }
+        
+        > input:invalid,
+        > textarea:invalid {
           background-color: red;
           color: white;
         }

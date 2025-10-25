@@ -32,6 +32,9 @@ function getFormData(){
     var currentItemFormElement = currentItemFormElements[element];
     var value;
     switch (currentItemFormElement.tagName) {
+      case 'BUTTON':
+      case 'OUTPUT':
+        continue;
       case 'TEXTAREA': 
         if (currentItemFormElement.name === 'responseConstraint') {
           value = currentItemFormElement.value.trim();
@@ -47,6 +50,9 @@ function getFormData(){
       default:
         value = currentItemFormElement.value;
         break;
+    }
+    if(!currentItemFormElement.name === 0){
+      debugger;
     }
     item[currentItemFormElement.name] = value;
   }
@@ -151,6 +157,8 @@ async function storePromptsToStorage(prompts){
 }
 
 async function loadOptions(event){
+  var sidebarItems = getSidebarItems();
+  sidebarItems.innerHTML = '';
   var prompts = await getPromptsFromStorage();
   var firstSidebarItem;
   for (var i = 0; i < prompts.length; i++){
@@ -398,6 +406,118 @@ async function exportPromptsClickedHandler(event){
 }
 
 async function importPromptsClickedHandler(event){
+  var fileInput = document.getElementById('importPromptsFile');
+  fileInput.click(event);
+}
+
+function validatePrompt(prompt){
+  var validatedPrompt = {};
+  if (prompt.id) {
+    var id = prompt.id.toLowerCase();
+    if(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/.test(prompt.id)){
+      return `Invalid id. Expected UUID v4, got "${id}"`;
+    }
+    validatedPrompt[id] = id;
+  }
+  else {
+    validatedPrompt[id] = crypto.randomUUID();
+  }
+  
+  if (!prompt.name || prompt.name.length === 0){
+    return 'Prompt must have a name.';
+  }
+  validatedPrompt.name = prompt.name.trim();
+  
+  var promptText = prompt.prompt;
+  if (promptText){
+    if (! typeof promptText === 'string'){
+      return 'Prompt should be a string.';
+    }
+    promptText = promptText.trim();
+    validatedPrompt.prompt = promptText;
+  }
+  else {
+    validatedPrompt.prompt = '';
+  }
+  
+  var responseConstraint = prompt.responseConstraint;
+  if (responseConstraint){
+    switch (responseConstraint) {
+      case 'string':
+        responseConstraint = responseConstraint.trim();
+        if (responseConstraint.length){
+          return `ResponseConstraint should be an empty string or an object, got ${responseConstraint}`
+        }
+        break;
+      case 'object':
+        break;
+      default:
+          return `ResponseConstraint should be an empty string or an object, got ${responseConstraint}`
+    }
+    validatedPrompt.responseConstraint = responseConstraint;
+  }
+  return true;
+}
+
+async function importPromptsFileChangedHandler(event){
+  var target = event.target;
+  var files = target.files;
+  var errors = [];
+  var importedPrompts = [];
+  for (var i = 0; i < files.length; i++){
+    var file = files[i];
+    var text = await file.text();
+    var obj = undefined;
+    try {
+      var obj = JSON.parse(text);
+      var type = typeof obj;
+      
+      if (type !== 'object'){
+        throw new Error(`Expected array or object, got ${type}`);
+      }
+      
+      if (obj instanceof Array){
+        importedPrompts = obj;
+      }
+      else {
+        importedPrompts = [obj];
+      }
+      
+      importedPrompts = importedPrompts.filter(function(prompt, index){
+        var validationResult = validatePrompt(prompt);
+        if (validationResult === true) {
+          return true;
+        }          
+        var error = errors[i];
+        if (!error){
+          error = errors[i] = {
+            file: e,
+            promptErrors: []
+          }
+          errors.promptErrors.push({
+            prompt: prompt,
+            index: index,
+            error: validationResult
+          });
+        }
+        return false;
+      });
+      
+      importedPrompts = [].concat(importedPrompts, obj);
+    }
+    catch (e){
+      errors[i] = {
+        file: file,
+        fileError: e
+      };
+    } 
+  } 
+  
+  var existingPrompts = await getPromptsFromStorage();
+  
+  var newPrompts = [].concat(existingPrompts, importedPrompts);
+  await storePromptsToStorage(newPrompts);
+  loadOptions();
 }
 
 document.getElementById('name').addEventListener('input', formChangedHandler);
@@ -407,6 +527,7 @@ document.getElementById('responseConstraint').addEventListener('input', formChan
 document.getElementById('addNew').addEventListener('click', addNewClickedHandler);
 document.getElementById('exportPrompts').addEventListener('click', exportPromptsClickedHandler);
 document.getElementById('importPrompts').addEventListener('click', importPromptsClickedHandler);
+document.getElementById('importPromptsFile').addEventListener('change', importPromptsFileChangedHandler);
 document.getElementById('saveCurrent').addEventListener('click', saveCurrentClickedHandler);
 document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);

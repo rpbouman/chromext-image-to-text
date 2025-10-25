@@ -17,7 +17,14 @@
         <menu role="toolbar">
           <li role="menuitem"><button id="addNew">Add New</button></li>
           <li role="menuitem"><button id="exportPrompts">Export Prompts</button></li>
-          <li role="menuitem"><button id="importPrompts">Import Prompts</button></li>
+          <li role="menuitem">
+            <button id="importPrompts">Import Prompts</button>
+            <input 
+              id="importPromptsFile"
+              type="file"  
+              accept=".json"
+            />
+          </li>
         </menu>
       </header>
       <nav>
