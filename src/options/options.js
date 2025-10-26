@@ -547,6 +547,30 @@ async function initPromptLibrary(){
   }
 }
 
+function searchHandler(event){
+  var searchElement = event.target;
+  var searchTerm = searchElement.value;
+  var regexp;
+  if (searchTerm.length){
+    var escapatedSearchTerm = RegExp.escape(searchTerm);
+    var regexp = new RegExp(escapatedSearchTerm, 'ig');
+  }
+  var tab = searchElement.parentNode.parentNode;
+  var itemContainer = tab.querySelector('ul');
+  var items = itemContainer.querySelectorAll('li > label');
+  for (var i = 0; i < items.length; i++){
+    var item = items.item(i);
+    var text = item.textContent;
+    var matched = regexp ? regexp.test(text) : true;
+    item.parentNode.setAttribute('data-matches-search', matched);
+  }
+}
+
+async function init(){
+  await loadOptions();
+  await initPromptLibrary();
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
@@ -560,5 +584,6 @@ document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentCl
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
 document.getElementById('generateJsonSchema').addEventListener('click', generateJsonSchemaClickedHandler);
-document.addEventListener('DOMContentLoaded', loadOptions);
-initPromptLibrary();
+document.getElementById('searchCustomPrompts').addEventListener('search', searchHandler);
+document.getElementById('searchLibraryPrompts').addEventListener('search', searchHandler);
+document.addEventListener('DOMContentLoaded', init);

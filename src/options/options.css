@@ -208,6 +208,10 @@ body {
           }
         }
         
+        > li[data-matches-search=false] {
+          display: none;
+        }
+        
         > li:has( > input[type=radio]:checked ) {
           background-color: Highlight;
           color: HighlightText;
