@@ -225,13 +225,10 @@ body {
         > header {
           > menu {
             > li {
-              
-              
               > button#cloneCurrent {
                 pointer-events: none;
                 color: GrayText;
               }
-              
             }
           }
         }
@@ -264,6 +261,17 @@ body {
 
  
   > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul  ) {
+    
+    > header {
+      > menu[role=toolbar]#customPromptsToolbar {
+        > li {
+          > button#exportPrompts {
+            pointer-events: none;
+            color: GrayText;
+          }
+        }
+      }
+    }
 
     > div {
       > section#gettingStarted {
@@ -279,6 +287,17 @@ body {
   }
 
   > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul > li ) {
+
+    > header {
+      > menu[role=toolbar]#customPromptsToolbar {
+        > li {
+          > button#exportPrompts {
+            pointer-events: unset;
+            color: unset;
+          }
+        }
+      }
+    }
 
     > div {
       > section#noPromptSelected {

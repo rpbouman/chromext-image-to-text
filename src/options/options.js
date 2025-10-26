@@ -1,3 +1,6 @@
+var githubowner = 'rpbouman';
+var githubrepo = 'chromext-image-to-text';
+
 function getSidebarItems(){
   var sidebarItems = document.getElementById('sidebarItems');
   return sidebarItems;
@@ -308,6 +311,10 @@ async function saveCurrentClickedHandler(event){
   setFormStateDirty(false);
 }
 
+async function contributeCurrentClickedHandler(event){
+  window.open(`https://github.com/${githubowner}/${githubrepo}/wiki/Custom-Prompts#contributing-to-the-online-prompt-library`, 'image-to-text-contributing');
+}
+
 function setFormStateDirty(state){
   var currentItemForm = document.getElementById('currentItemForm');
   currentItemForm.setAttribute('data-dirty', Boolean(state));  
@@ -580,7 +587,7 @@ async function importPromptsFileChangedHandler(event){
   loadOptions();
 }
 
-var promptLibraryRepoUrl = 'https://api.github.com/repos/rpbouman/chromext-image-to-text/contents/prompts';
+var promptLibraryRepoUrl = `https://api.github.com/repos/${githubowner}/${githubrepo}/contents/prompts`;
 async function initPromptLibrary(){
   try {
     var response = await fetch(promptLibraryRepoUrl);
@@ -677,6 +684,7 @@ document.getElementById('exportPrompts').addEventListener('click', exportPrompts
 document.getElementById('importPrompts').addEventListener('click', importPromptsClickedHandler);
 document.getElementById('importPromptsFile').addEventListener('change', importPromptsFileChangedHandler);
 document.getElementById('saveCurrent').addEventListener('click', saveCurrentClickedHandler);
+document.getElementById('contributeCurrent').addEventListener('click', contributeCurrentClickedHandler);
 document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
