@@ -9,12 +9,22 @@ function getLibraryPrompts(){
 }
 
 function updateForm(item){
+  var selectedTab = getSelectedTab(document.querySelector('form[role=tablist]'));
+  var readonly = selectedTab.id === 'promptLibrary';
+  
   var currentItemForm = document.getElementById('currentItemForm');
   var currentItemFormElements = currentItemForm.elements;
   for (var property in item){
     var currentItemFormElement = currentItemFormElements[property];
     if (!currentItemFormElement){
       continue;
+    }
+    
+    if (readonly) {
+      currentItemFormElement.setAttribute('readonly', true);
+    }
+    else {
+      currentItemFormElement.removeAttribute('readonly');
     }
     
     var value = item[property];
@@ -27,6 +37,15 @@ function updateForm(item){
     }
   }
   setFormStateDirty(false);
+}
+
+function clearForm(){
+  updateForm({
+    id: '',
+    name: '',
+    prompt: '',
+    responseConstraint: ''
+  })
 }
 
 function getFormData(){
@@ -66,12 +85,29 @@ function getFormData(){
 
 async function sidebarItemChangeHandler(event){
   var input = event.target;
-  if (!input.checked) {
+  await updateFormStateForSidebarItem(input);
+}
+
+async function updateFormStateForSidebarItem(sidebarItem){
+  clearForm();
+  if (!sidebarItem || !sidebarItem.checked) {
     return;
   }
-  var id = input.id;
-  var item = await getItem(id);
-  updateForm(item);
+  var id = sidebarItem.id;
+  var item;
+  var listId = sidebarItem.parentNode.parentNode.id;
+  switch (listId){
+    case 'sidebarItems':
+      item = await getCustomPromptItem(id);
+      break;
+    case 'libraryPrompts':
+      item = await getPromptLibraryItem(id);
+      break;
+    default:
+      // shouldn't happen
+      return;
+  }
+  updateForm(item);  
 }
 
 function getCurrentItemId(){
@@ -164,7 +200,9 @@ async function storePromptsToStorage(prompts){
 
 async function loadOptions(event){
   var sidebarItems = getSidebarItems();
-  sidebarItems.innerHTML = '';
+  while (sidebarItems.childNodes.length) {
+    sidebarItems.removeChild(sidebarItems.childNodes[0]);
+  }
   var prompts = await getPromptsFromStorage();
   var firstSidebarItem;
   for (var i = 0; i < prompts.length; i++){
@@ -175,6 +213,21 @@ async function loadOptions(event){
 
 function getNewItemId(){
   return crypto.randomUUID();
+}
+
+async function addToCollectionClickedHandler(event){
+  var item = getFormData();
+  var prompts = await getPromptsFromStorage();
+  
+  var index = await findItemIndex(id);
+  if (index === -1) {
+    prompts.push(item);
+  }
+  else {
+    prompts[index] = getFormData();
+  }
+  await storePromptsToStorage(prompts);
+  await loadOptions();
 }
 
 async function addNewClickedHandler(event){
@@ -190,7 +243,7 @@ async function addNewClickedHandler(event){
 
 async function cloneCurrentClickedHandler(){
   var id = getCurrentItemId();
-  var item = await getItem(id);
+  var item = await getCustomPromptItem(id);
   var newItem = Object.assign({}, item, {
     id: getNewItemId()
   });
@@ -212,7 +265,7 @@ async function findItemIndex(id){
   return index;
 }
 
-async function getItem(id){
+async function getCustomPromptItem(id){
   var index = await findItemIndex(id);
   if (index === -1) {
     return undefined;
@@ -236,11 +289,12 @@ async function deleteCurrentClickedHandler(event){
   }
   var sidebar = currentSidebarItem.parentNode;
   sidebar.removeChild(currentSidebarItem);
+  clearForm();
 }
 
 async function restoreCurrentClickedHandler(event){
   var id = getCurrentItemId();
-  var item = await getItem(id);
+  var item = await getCustomPromptItem(id);
   updateForm(item);
   updateCurrentSidebarItemFromForm();
 }
@@ -526,7 +580,7 @@ async function importPromptsFileChangedHandler(event){
   loadOptions();
 }
 
-var promptLibraryRepoUrl = 'https://api.github.com/repos/rpbouman/chromext-image-to-text/contents/prompts'
+var promptLibraryRepoUrl = 'https://api.github.com/repos/rpbouman/chromext-image-to-text/contents/prompts';
 async function initPromptLibrary(){
   try {
     var response = await fetch(promptLibraryRepoUrl);
@@ -547,6 +601,37 @@ async function initPromptLibrary(){
   }
 }
 
+async function getPromptLibraryItem(id){
+  var promptLibraryItemUrl = `${promptLibraryRepoUrl}/${encodeURIComponent(id)}/prompt.json`;
+  var doc = await fetch(promptLibraryItemUrl);
+  if (doc.status !== 200 ){
+    throw new Error(`Error downloading prompt "${id}" from online prompt library.`);
+  }
+  var item;
+  var obj = await doc.json();
+  if (obj.content){
+    var encoding = obj.encoding;
+    switch (encoding){
+      case 'base64':
+        item = atob(obj.content);
+        item = JSON.parse(item);
+        break;
+      default:
+    }
+  }
+
+  if (!item){
+    var downloadUrl = obj.download_url;
+    var itemDoc = await fetch(downloadUrl);
+    if (itemDoc.status !== 200) {
+      throw new Error(`Error downloading prompt "${id}" from online prompt library.`);
+    }
+    item = await itemDoc.json();
+  }
+    
+  return item;
+}
+
 function searchHandler(event){
   var searchElement = event.target;
   var searchTerm = searchElement.value;
@@ -562,8 +647,19 @@ function searchHandler(event){
     var item = items.item(i);
     var text = item.textContent;
     var matched = regexp ? regexp.test(text) : true;
-    item.parentNode.setAttribute('data-matches-search', matched);
+    if (matched){
+      item.parentNode.removeAttribute('data-matches-search');
+    }
+    else {
+      item.parentNode.setAttribute('data-matches-search', matched);
+    }
   }
+}
+
+async function tabSelectionChanged(event){
+  var target = event.target;
+  var selectedItem = target.parentNode.querySelector('div[role=tabpanel] > ul > li > input[type=radio]:checked');
+  updateFormStateForSidebarItem(selectedItem);
 }
 
 async function init(){
@@ -575,6 +671,7 @@ document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
 
+document.getElementById('addToCollection').addEventListener('click', addToCollectionClickedHandler);
 document.getElementById('addNew').addEventListener('click', addNewClickedHandler);
 document.getElementById('exportPrompts').addEventListener('click', exportPromptsClickedHandler);
 document.getElementById('importPrompts').addEventListener('click', importPromptsClickedHandler);
@@ -586,4 +683,5 @@ document.getElementById('restoreCurrent').addEventListener('click', restoreCurre
 document.getElementById('generateJsonSchema').addEventListener('click', generateJsonSchemaClickedHandler);
 document.getElementById('searchCustomPrompts').addEventListener('search', searchHandler);
 document.getElementById('searchLibraryPrompts').addEventListener('search', searchHandler);
+addTabSelectionChangedHandler(document.querySelector('*[role=tablist]'), tabSelectionChanged)
 document.addEventListener('DOMContentLoaded', init);
