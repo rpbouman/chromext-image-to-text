@@ -48,9 +48,19 @@ body {
       font-family: sans-serif;
       font-size: 16px;
     }
+
+    > section > form > label::after,
+    > nav  search > label::after {
+      content: ': ';
+    }
     
+    > nav  search > input[type=search] {
+      width: calc( 100% - 4em );
+    }
+        
     > section {
       padding-left: .5em;
+      padding-top: 4px;
       overflow-y: scroll;
       
       > header {
@@ -65,11 +75,7 @@ body {
         grid-auto-flow: row;
         grid-gap: 0.25em;
         padding-top: 0.75em;
-        
-        > label::after {
-          content: ': ';
-        }
-        
+                
         > input#name {
           width: 30ch;
         }
@@ -166,8 +172,14 @@ body {
       border-right-style: solid;
       border-right-width: 1px;
       border-right-color: rgb(200,200,200);
+      padding-top: 6px;
       
-      > ul#sidebarItems {
+      search {
+        margin: 1em 0em 1em 1em;
+      }
+      
+      ul#sidebarItems,
+      ul#libraryPrompts {
         
         padding-block-start: 0em;
         padding-block-end: 0em;
@@ -218,7 +230,7 @@ body {
 
   
   /* if there are no custom promtps at all, you get the getting started screen */
-  > main:has( > nav > ul#sidebarItems:empty ) {
+  > main:has( > nav > ul:empty ) {
     
     > section#gettingStarted {
       display: block;
@@ -235,7 +247,7 @@ body {
     }
   }
   
-  > main:has( > nav > ul#sidebarItems:not( > li ) ) {
+  > main:has( > nav ul:not( > li ) ) {
     
     > section#gettingStarted {
       display: block;
@@ -248,7 +260,7 @@ body {
 
   }
 
-  > main:has( > nav > ul#sidebarItems > li  ) {
+  > main:has( > nav ul > li  ) {
 
     > section#noPromptSelected {
       display: block;
@@ -261,7 +273,7 @@ body {
   }
   
   /* if a custom prompt is selected, we get to edit it */
-  > main:has( > nav > ul#sidebarItems > li > input[type=radio][name=itemSelection]:checked ) {
+  > main:has( > nav ul > li > input[type=radio]:checked ) {
     > section#editPromptUi {
       display: unset;
     }

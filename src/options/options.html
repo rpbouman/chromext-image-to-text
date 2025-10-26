@@ -3,6 +3,7 @@
   <head>
     <title>Image-to-Text Contextmenu - Options</title>
     <link rel="stylesheet" type="text/css" href="options.css"/> 
+    <link rel="stylesheet" type="text/css" href="tabs.css"/> 
   </head>
   <body>
     <template id="sidebarItem">
@@ -28,7 +29,30 @@
         </menu>
       </header>
       <nav>
-        <ul id="sidebarItems"></ul>
+        <form role="tablist">
+          <div>
+            <label role="tab" for="customPrompts">Custom Prompts</label>
+            <input type="radio" name="tabs" id="customPrompts" checked="true"/>
+            <div role="tabpanel">
+              <search>
+                <label for="searchCustomPrompts">Search</label>
+                <input id="searchCustomPrompts" type="search"/>
+              </search>
+              <ul id="sidebarItems"></ul>
+            </div>
+          </div>
+          <div>
+            <label role="tab" for="promptLibrary">Prompt Library</label>
+            <input type="radio" name="tabs" id="promptLibrary"/>
+            <div role="tabpanel">
+              <search>
+                <label for="searchLibraryPrompts">Search</label>
+                <input id="searchLibraryPrompts" type="search"/>
+              </search>
+              <ul id="libraryPrompts"></ul>
+            </div>
+          </div>
+        </form>
       </nav>
       <section id="gettingStarted">
         <h1>Getting started with custom Image-to-Text prompts</h1>

@@ -3,6 +3,11 @@ function getSidebarItems(){
   return sidebarItems;
 }
 
+function getLibraryPrompts(){
+  var libraryPrompts = document.getElementById('libraryPrompts');
+  return libraryPrompts;
+}
+
 function updateForm(item){
   var currentItemForm = document.getElementById('currentItemForm');
   var currentItemFormElements = currentItemForm.elements;
@@ -101,11 +106,10 @@ function instantiateSidebarItem(id){
   return sidebarItem;
 }
 
-function addSidebarItem(promptInfo, selected) {
-  var sidebarItems = getSidebarItems();
+function addSidebarItem(sidebarItemsContainer, promptInfo, selected) {
   var sidebarItem = instantiateSidebarItem(promptInfo.id);
-  sidebarItems.appendChild(sidebarItem);
-  sidebarItems = sidebarItems.getElementsByTagName('li');
+  sidebarItemsContainer.appendChild(sidebarItem);
+  sidebarItems = sidebarItemsContainer.getElementsByTagName('li');
   sidebarItem = sidebarItems[sidebarItems.length - 1];
   
   var label = sidebarItem.querySelector('label');
@@ -117,8 +121,10 @@ function addSidebarItem(promptInfo, selected) {
   }
   icon.src = src;
   
+  var radio = sidebarItem.querySelector('input[type=radio]');
+  radio.name = sidebarItemsContainer.id + '_itemSelection'
   if (selected === true) {
-    sidebarItem.querySelector('input[type=radio]').click();
+    radio.click();
     updateForm();
     document.getElementById('name').select();
     document.getElementById('name').focus();
@@ -163,7 +169,7 @@ async function loadOptions(event){
   var firstSidebarItem;
   for (var i = 0; i < prompts.length; i++){
     var promptInfo = prompts[i];
-    addSidebarItem(promptInfo);
+    addSidebarItem(sidebarItems, promptInfo);
   }
 }
 
@@ -195,7 +201,7 @@ async function addNewItem(newItem){
   var prompts = await getPromptsFromStorage();
   prompts.push(newItem);
   await storePromptsToStorage(prompts);
-  addSidebarItem(newItem, true);
+  addSidebarItem(getSidebarItems(), newItem, true);
 }
 
 async function findItemIndex(id){
@@ -520,6 +526,27 @@ async function importPromptsFileChangedHandler(event){
   loadOptions();
 }
 
+var promptLibraryRepoUrl = 'https://api.github.com/repos/rpbouman/chromext-image-to-text/contents/prompts'
+async function initPromptLibrary(){
+  try {
+    var response = await fetch(promptLibraryRepoUrl);
+    if (response.status !== 200){
+      return;
+    }
+    var data = await response.json();
+    var libraryPrompts = getLibraryPrompts();
+    for (var i = 0; i < data.length; i++){
+      var libraryPrompt = data[i];
+      addSidebarItem(libraryPrompts, {
+        id: libraryPrompt.name,
+        name: libraryPrompt.name
+      });
+    }
+  }
+  catch(e){
+  }
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
@@ -534,3 +561,4 @@ document.getElementById('deleteCurrent').addEventListener('click', deleteCurrent
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
 document.getElementById('generateJsonSchema').addEventListener('click', generateJsonSchemaClickedHandler);
 document.addEventListener('DOMContentLoaded', loadOptions);
+initPromptLibrary();
