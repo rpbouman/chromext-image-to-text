@@ -13,7 +13,7 @@ header {
   
   > menu[role=toolbar] {
 
-    font-family: system-ui !important;      
+    font-family: system-ui;      
     margin-block-start: 2px;
     margin-block-end: 2px;
     padding-inline-start: 2px;
@@ -39,124 +39,13 @@ body {
     grid-template-columns: 1fr 99fr;
     grid-template-rows: 1fr 98fr 1fr;
     
-    > section#editPromptUi {
-      font-family: system-ui !important;      
-    }
-
-    > section#gettingStarted,
-    > section#noPromptSelected {
-      font-family: sans-serif;
-      font-size: 16px;
-    }
-    
-    > section {
-      padding-left: .5em;
-      overflow-y: scroll;
-      
-      > header {
-        position: fixed;
-        background: white;
-      }
-      
-      > form {
-        margin-top: 2em;
-        display: grid;
-        grid-template-columns: [labels] auto [controls] 1fr;
-        grid-auto-flow: row;
-        grid-gap: 0.25em;
-        padding-top: 0.75em;
-        
-        > label::after {
-          content: ': ';
-        }
-        
-        > input#name {
-          width: 30ch;
-        }
-        
-        > textarea {
-          resize: vertical;
-        }
-        
-        > input:invalid,
-        > textarea:invalid {
-          background-color: red;
-          color: white;
-        }
-        
-        > menu[role=toolbar] {
-          list-style: none;
-          
-          margin-block-start: 0px;
-          margin-block-end: 0px;
-          padding-inline-start: 0px;
-          display: inline-flex;
-          
-          > li {
-            > button {
-            }
-          }
-        }
-      }
-    }
-
-    > section:has( > form#currentItemForm > *:invalid ){
-      > header {
-        > menu {
-          > li {
-            
-            > button#saveCurrent {
-              pointer-events: none;
-              color: GrayText;
-            }
-          }
-        }
-      }
-    }
-
-    > section:has( > form#currentItemForm[data-dirty=false] ) {
-      > header {
-        > menu {
-          > li {
-            
-            > button#saveCurrent,
-            > button#restoreCurrent {
-              pointer-events: none;
-              color: GrayText;
-            }
-            
-          }
-        }
-      }
-    }
-    
-    > section:has( > form#currentItemForm[data-dirty=true] ) {
-      > header {
-        > menu {
-          > li {
-            
-            
-            > button#cloneCurrent {
-              pointer-events: none;
-              color: GrayText;
-            }
-            
-          }
-        }
-      }
-    }
-
-    > footer {
-      font-family: system-ui !important;      
-      grid-row: 3;
-      grid-column: 1/3;
-      border-top-style: solid;
-      border-top-width: 1px;
-      border-top-color: rgb(200,200,200);
+    > div > section > form > label::after,
+    > nav  search > label::after {
+      content: ': ';
     }
 
     > nav {
-      font-family: system-ui !important;
+      font-family: system-ui;
       grid-row: 2;
       grid-column: 1/2;
       min-width: 200px;
@@ -166,8 +55,19 @@ body {
       border-right-style: solid;
       border-right-width: 1px;
       border-right-color: rgb(200,200,200);
+      padding-top: 6px;
+            
+      search {
+        margin: 1em 0em 1em 1em;
+
+        > input[type=search] {
+          width: calc( 100% - 4em );
+        }      
+        
+      }
       
-      > ul#sidebarItems {
+      ul#sidebarItems,
+      ul#libraryPrompts {
         
         padding-block-start: 0em;
         padding-block-end: 0em;
@@ -196,6 +96,10 @@ body {
           }
         }
         
+        > li[data-matches-search=false] {
+          display: none;
+        }
+        
         > li:has( > input[type=radio]:checked ) {
           background-color: Highlight;
           color: HighlightText;
@@ -208,76 +112,307 @@ body {
       }
       
     }    
-  }
-
-  label[for=addNew] {
-    color: blue;
-    text-decoration: underline;
-    cursor: pointer;
-  }
-
-  
-  /* if there are no custom promtps at all, you get the getting started screen */
-  > main:has( > nav > ul#sidebarItems:empty ) {
     
-    > section#gettingStarted {
-      display: block;
+    > div {
+      
+      > section#editPromptUi {
+        font-family: system-ui;
+      }        
+      
+      > section#gettingStarted,
+      > section#noPromptSelected,
+      > section#noLibraryPromptSelected {
+        font-family: sans-serif;
+        font-size: 12pt;  
+        
+        h1:first-child {
+          margin-block-start: 0px;
+        }
+          
+        label[for] {
+          color: blue;
+          text-decoration: underline;
+          cursor:pointer;
+        }
+      }
+      
+      
+      > section {        
+        padding-left: .5em;
+        padding-top: 4px;
+        overflow-y: scroll;
+        
+        > header {
+          position: fixed;
+          background: white;
+        }
+        
+        > form {
+          margin-top: 2em;
+          display: grid;
+          grid-template-columns: [labels] auto [controls] 1fr;
+          grid-auto-flow: row;
+          grid-gap: 0.25em;
+          padding-top: 0.75em;
+                  
+          > input#name {
+            width: 30ch;
+          }
+          
+          > textarea {
+            resize: vertical;
+          }
+          
+          > input:invalid,
+          > textarea:invalid {
+            background-color: red;
+            color: white;
+          }
+          
+          > menu[role=toolbar] {
+            list-style: none;
+            
+            margin-block-start: 0px;
+            margin-block-end: 0px;
+            padding-inline-start: 0px;
+            display: inline-flex;
+            
+            > li {
+              > button {
+              }
+            }
+          }
+          
+          input[readonly],
+          textarea[readonly] {
+            background-color: ButtonFace;
+            outline-style: none;
+          }
+        }
+      }
+      
+      > section:has( > form#currentItemForm > *:invalid ){
+        > header {
+          > menu {
+            > li {
+              
+              > button#saveCurrent {
+                pointer-events: none;
+                color: GrayText;
+              }
+            }
+          }
+        }
+      }
+
+      > section:has( > form#currentItemForm[data-dirty=false] ) {
+        > header {
+          > menu {
+            > li {
+              
+              > button#saveCurrent,
+              > button#restoreCurrent {
+                pointer-events: none;
+                color: GrayText;
+              }
+              
+            }
+          }
+        }
+      }
+      
+      > section:has( > form#currentItemForm[data-dirty=true] ) {
+        > header {
+          > menu {
+            > li {
+              > button#cloneCurrent {
+                pointer-events: none;
+                color: GrayText;
+              }
+            }
+          }
+        }
+      }
+      
     }
 
-    > section#noPromptSelected,
-    > section#editPromptUi {
+    > footer {
+      font-family: system-ui;      
+      grid-row: 3;
+      grid-column: 1/3;
+      border-top-style: solid;
+      border-top-width: 1px;
+      border-top-color: rgb(200,200,200);
+    }
+
+  }
+
+  > main > nav > form[role=tablist] > div > div[role=tabpanel] {
+    > search {
       display: none;
     }
+  }
 
-    > header > menu > li > button#exportPrompts {
-      color: GrayText;
-      pointer-events: none;
+  > main > nav > form[role=tablist] > div > div[role=tabpanel]:has( > ul > li ) {
+    > search {
+      display: block;
     }
   }
-  
-  > main:has( > nav > ul#sidebarItems:not( > li ) ) {
+
+ 
+  > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul  ) {
     
-    > section#gettingStarted {
-      display: block;
+    > header {
+      > menu[role=toolbar]#customPromptsToolbar {
+        > li {
+          > button#exportPrompts {
+            pointer-events: none;
+            color: GrayText;
+          }
+        }
+      }
     }
 
-    > section#noPromptSelected,
-    > section#editPromptUi {
-      display: none;
-    }
+    > div {
+      > section#gettingStarted {
+        display: block;
+      }
 
+      > section#noPromptSelected,
+      > section#noLibraryPromptSelected,
+      > section#editPromptUi {
+        display: none;
+      }    
+    }
   }
 
-  > main:has( > nav > ul#sidebarItems > li  ) {
+  > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul > li ) {
 
-    > section#noPromptSelected {
-      display: block;
+    > header {
+      > menu[role=toolbar]#customPromptsToolbar {
+        > li {
+          > button#exportPrompts {
+            pointer-events: unset;
+            color: unset;
+          }
+        }
+      }
     }
 
-    > section#gettingStarted,
-    > section#editPromptUi {
-      display: none;
-    }    
+    > div {
+      > section#noPromptSelected {
+        display: block;
+      }
+
+      > section#gettingStarted,
+      > section#noLibraryPromptSelected,
+      > section#editPromptUi {
+        display: none;
+      }    
+    }
+  }
+
+  > main:has( > nav > form[role=tablist] > div > input#promptLibrary:checked + div[role=tabpanel] > ul > li  ) {
+
+    > div {
+      > section#noLibraryPromptSelected {
+        display: block;
+      }
+
+      > section#gettingStarted,
+      > section#noPromptSelected,
+      > section#editPromptUi {
+        display: none;
+      }    
+    }
   }
   
-  /* if a custom prompt is selected, we get to edit it */
-  > main:has( > nav > ul#sidebarItems > li > input[type=radio][name=itemSelection]:checked ) {
-    > section#editPromptUi {
-      display: unset;
-    }
+  /* if an item is selected, we get to edit it > main:has( > nav ul > li > input[type=radio]:checked )  */
+  > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul > li > input[type=radio]:checked ),
+  > main:has( > nav > form[role=tablist] > div > input#promptLibrary:checked + div[role=tabpanel] > ul > li > input[type=radio]:checked )
+  {
+    
+    > div {
 
-    > section#gettingStarted,
-    > section#noPromptSelected {
-      display: none;
+      > section#editPromptUi {
+        display: block;
+      }
+
+      > section#gettingStarted,
+      > section#noPromptSelected,
+      > section#noLibraryPromptSelected {
+        display: none;
+      }
+    }
+    
+  }
+
+  > main {
+    
+    > header {
+      > menu[role=toolbar] {
+        visibility: hidden;
+      }
+    }
+    
+    > div {
+      > section {
+        menu[role=toolbar] {
+          display: none;
+        }  
+      }
     }
   }
 
+  > main:has(  > nav > form[role=tablist] > div > input#customPrompts:checked ) {
+    > header {
+      > menu#customPromptsToolbar[role=toolbar] {
+        visibility: visible;
+      }
+    }
+    
+    > div {
+
+      > section {
+        > header {
+          > menu#customPromptToolbar[role=toolbar] {
+            display:block;
+          }
+        }
+       
+        > form {
+          > menu#customPromptExtraToolbar[role=toolbar] {
+            display:block;
+          }
+        }
+      }
+    }
+  }
+
+  > main:has(  > nav > form[role=tablist] > div > input#promptLibrary:checked ) {
+    
+    > div {
+      > section {
+        > header {
+          > menu#promptLibraryToolbar[role=toolbar] {
+            display:block;
+          }
+        }
+        > form {
+          > menu#customPromptExtraToolbar[role=toolbar] {
+            display:none;
+          }
+        }
+      }
+    }
+    
+  }
 
   /* 
     if the currently select prompt has been edited, we cannot select another one. 
     the user needs to either save or restore to continue with something else.
   */
-  > main:has( > section#editPromptUi > form#currentItemForm[data-dirty=true] ) {
+  > main:has( > div > section#editPromptUi > form#currentItemForm[data-dirty=true] ) {
     > nav {
       pointer-events: none;
     }

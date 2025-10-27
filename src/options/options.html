@@ -3,6 +3,7 @@
   <head>
     <title>Image-to-Text Contextmenu - Options</title>
     <link rel="stylesheet" type="text/css" href="options.css"/> 
+    <link rel="stylesheet" type="text/css" href="tabs.css"/> 
   </head>
   <body>
     <template id="sidebarItem">
@@ -14,7 +15,7 @@
     </template>
     <main>
       <header>
-        <menu role="toolbar">
+        <menu role="toolbar" id="customPromptsToolbar">
           <li role="menuitem"><button id="addNew">Add New</button></li>
           <li role="menuitem"><button id="exportPrompts">Export Prompts</button></li>
           <li role="menuitem">
@@ -28,110 +29,179 @@
         </menu>
       </header>
       <nav>
-        <ul id="sidebarItems"></ul>
-      </nav>
-      <section id="gettingStarted">
-        <h1>Getting started with custom Image-to-Text prompts</h1>
-        <p>
-          Looks like you don't have any custom Image-to-Text Contextmenu prompts yet.
-          Just click <label for="addNew">Add New</label> to get started!
-        </p>
-      </section>
-      <section id="noPromptSelected">
-        <h1>Select a prompt in the sidebar</h1>
-        <p>
-          Click any of the custom prompts in the sidebar to select it.
-          Or, click <label for="addNew">Add New</label> to create a new one.
-        </p>
-      </section>
-      <section id="editPromptUi">
-        <header>
-          <menu role="toolbar">
-            <li role="menuitem">
-              <button 
-                id="saveCurrent"
-                type="button"                
-                title="Click to save the changes to this custom prompt."
-              >Save</button>
-            </li>
-            <li role="menuitem">
-              <button 
-                id="restoreCurrent" 
-                type="button"                
-                title="Click undo the unsaved changes and restore this custom prompt."
-              >Restore</button>
-            </li>
-            <li role="menuitem">
-              <button 
-                id="cloneCurrent"
-                type="button"                
-                title="Click to create a copy of this prompt"
-              >Clone</button>
-            </li>
-            <li role="menuitem">
-              <button 
-                id="deleteCurrent"
-                type="button"                
-                title="Click to permanently remove the current prompt"
-              >Delete</button>
-            </li>
-          </menu>
-        </header>
-        <form id="currentItemForm" data-dirty="false">
-          <input id="id" name="id" type="hidden"/>
-          <label 
-            for="name" 
-            placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too."
-            title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
-          >Name</label>
-          <input 
-            id="name" 
-            name="name" 
-            size="30" 
-            type="text"
-            required="true"
-            title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
-          />
-          <label 
-            for="prompt"
-            title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
-          >Prompt</label>
-          <textarea 
-            rows="10" 
-            id="prompt" 
-            name="prompt" 
-            placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."
-            title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
-          ></textarea>
-          <label 
-            for="responseConstraint"
-            title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
-          >Response Constraint</label>
-          <textarea 
-            rows="20" 
-            id="responseConstraint" 
-            name="responseConstraint" 
-            placeholder="Optionally, provide s JSON schema to control the structure and content of the response."
-            title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
-          ></textarea>
-          <label></label>
-          <menu role="toolbar">
-            <li>
-              <button 
-                type="button" 
-                id="generateJsonSchema"
-                title="Click this to generate a new JSON schema based on the current prompt text. The generated schema is just a suggestion: you can always change either the prompt or the JSON schema later on."
-              >Generate JSON Schema...</button>
-            </li>
-            <li>
-              <output id="dowloadProgress"></output>
-            </li>
-          </menu>
+        <form role="tablist">
+          <div>
+            <label role="tab" for="customPrompts">Custom Prompts</label>
+            <input type="radio" name="tabs" id="customPrompts" checked="true"/>
+            <div role="tabpanel">
+              <search>
+                <label for="searchCustomPrompts">Search</label>
+                <input 
+                  id="searchCustomPrompts" 
+                  type="search"
+                  incremental="true"
+                />
+              </search>
+              <ul id="sidebarItems"></ul>
+            </div>
+          </div>
+          <div>
+            <label role="tab" for="promptLibrary">Prompt Library</label>
+            <input type="radio" name="tabs" id="promptLibrary"/>
+            <div role="tabpanel">
+              <search>
+                <label for="searchLibraryPrompts">Search</label>
+                <input 
+                  id="searchLibraryPrompts" 
+                  type="search"
+                  incremental="true"
+                />
+              </search>
+              <ul id="libraryPrompts"></ul>
+            </div>
+          </div>
         </form>
-        <footer>
-        </footer>
-      </section>
+      </nav>
+      <div>
+        <section id="gettingStarted">
+          <h1>Getting started with custom Image-to-Text prompts</h1>
+          <p>
+            Looks like you don't have any custom Image-to-Text Contextmenu prompts yet.
+            Just click <label for="addNew">Add New</label> to get started!
+          </p>
+          <p>
+            Alternatively, activate the <label for="promptLibrary">Prompt Library</label>-tab to browse a curated collection of prompts online.
+          </p>
+        </section>
+        <section id="noPromptSelected">
+          <h1>Select a Custom Prompt</h1>
+          <p>
+            Currently, no prompt is selected. You can:
+          </p>
+          <ul>
+            <li>Select one of your custom prompts in the sidebar to inspect and edit it.</li>
+            <li>Click <label for="addNew">Add New</label> to create a new custom prompt from scratch.</li>
+          </ul>
+          <p>
+            Alternatively, activate the <label for="promptLibrary">Prompt Library</label>-tab to browse a curated collection of prompts online.
+          </p>
+        </section>
+        <section id="noLibraryPromptSelected">
+          <h1>Explore the Prompt Library</h1>
+          <p>
+            Currently, no library prompt is selected.
+            Select one of prompts from the library in the sidebar to inspect it and to add it to your collection.
+          </p>
+          <p>
+            Alternatively, you can activate the <label for="customPrompts">Custom Prompts</label>-tab to manage your collection of custom prompts.
+          </p>        
+        </section>
+        <section id="editPromptUi">
+          <header>
+            <menu role="toolbar" id="promptLibraryToolbar">
+              <li role="menuitem">
+                <button 
+                  id="addToCollection"
+                  type="button"                
+                  title="Click to add this prompt to my prompt collection."
+                >Add to my Prompts</button>
+              </li>
+            </menu>
+            <menu role="toolbar" id="customPromptToolbar">
+              <li role="menuitem">
+                <button 
+                  id="saveCurrent"
+                  type="button"                
+                  title="Click to save the changes to this custom prompt."
+                >Save</button>
+              </li>
+              <li role="menuitem">
+                <button 
+                  id="restoreCurrent" 
+                  type="button"                
+                  title="Click undo the unsaved changes and restore this custom prompt."
+                >Restore</button>
+              </li>
+              <li role="menuitem">
+                <button 
+                  id="contributeCurrent" 
+                  type="button"                
+                  title="Click if you'd like to contribute your custom prompt to the Prompt Library."
+                >Share</button>
+              </li>
+              <li role="menuitem">
+                <button 
+                  id="cloneCurrent"
+                  type="button"                
+                  title="Click to create a copy of this prompt"
+                >Clone</button>
+              </li>
+              <li role="menuitem">
+                <button 
+                  id="deleteCurrent"
+                  type="button"                
+                  title="Click to permanently remove the current prompt"
+                >Delete</button>
+              </li>
+            </menu>
+          </header>
+          <form id="currentItemForm" data-dirty="false">
+            <input id="id" name="id" type="hidden"/>
+            <label 
+              for="name" 
+              placeholder="Type a unique and descriptive name for your prompt. This will be used as context menu label too."
+              title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
+            >Name</label>
+            <input 
+              id="name" 
+              name="name" 
+              size="30" 
+              type="text"
+              required="true"
+              title="This is the name of your custom prompt. This will be used as the label for the context menu item to apply this prompt to the image"
+            />
+            <label 
+              for="prompt"
+              title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
+            >Prompt</label>
+            <textarea 
+              rows="10" 
+              id="prompt" 
+              name="prompt" 
+              placeholder="Provide precise instructions for your custom image to text action. Describe how to analyze the image content, what kind of information to extract, and how it should be presented/formatted in the output text."
+              title="Type your prompt here. This prompt will be used as extra instruction to guide the image analysis and output."
+            ></textarea>
+            <label 
+              for="responseConstraint"
+              title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
+            >Response Constraint</label>
+            <textarea 
+              rows="20" 
+              id="responseConstraint" 
+              name="responseConstraint" 
+              placeholder="Optionally, provide s JSON schema to control the structure and content of the response."
+              title="Optionally, type your response constraint here. A response constraint is useful if you need the response to be structured according to a pre-determined JSON schema. (See: https://json-schema.org/)"
+            ></textarea>
+            <label></label>
+            <menu role="toolbar" id="customPromptExtraToolbar">
+              <li>
+                <button 
+                  type="button" 
+                  id="generateJsonSchema"
+                  title="Click this to generate a new JSON schema based on the current prompt text. The generated schema is just a suggestion: you can always change either the prompt or the JSON schema later on."
+                >Generate JSON Schema...</button>
+              </li>
+              <li>
+                <output id="dowloadProgress"></output>
+              </li>
+            </menu>
+          </form>
+          <footer>
+          </footer>
+        </section>
+      </div>
     </main>
+    <script src="tabs.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

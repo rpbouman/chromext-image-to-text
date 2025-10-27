@@ -1,15 +1,33 @@
+var githubowner = 'rpbouman';
+var githubrepo = 'chromext-image-to-text';
+
 function getSidebarItems(){
   var sidebarItems = document.getElementById('sidebarItems');
   return sidebarItems;
 }
 
+function getLibraryPrompts(){
+  var libraryPrompts = document.getElementById('libraryPrompts');
+  return libraryPrompts;
+}
+
 function updateForm(item){
+  var selectedTab = getSelectedTab(document.querySelector('form[role=tablist]'));
+  var readonly = selectedTab.id === 'promptLibrary';
+  
   var currentItemForm = document.getElementById('currentItemForm');
   var currentItemFormElements = currentItemForm.elements;
   for (var property in item){
     var currentItemFormElement = currentItemFormElements[property];
     if (!currentItemFormElement){
       continue;
+    }
+    
+    if (readonly) {
+      currentItemFormElement.setAttribute('readonly', true);
+    }
+    else {
+      currentItemFormElement.removeAttribute('readonly');
     }
     
     var value = item[property];
@@ -22,6 +40,15 @@ function updateForm(item){
     }
   }
   setFormStateDirty(false);
+}
+
+function clearForm(){
+  updateForm({
+    id: '',
+    name: '',
+    prompt: '',
+    responseConstraint: ''
+  })
 }
 
 function getFormData(){
@@ -61,12 +88,29 @@ function getFormData(){
 
 async function sidebarItemChangeHandler(event){
   var input = event.target;
-  if (!input.checked) {
+  await updateFormStateForSidebarItem(input);
+}
+
+async function updateFormStateForSidebarItem(sidebarItem){
+  clearForm();
+  if (!sidebarItem || !sidebarItem.checked) {
     return;
   }
-  var id = input.id;
-  var item = await getItem(id);
-  updateForm(item);
+  var id = sidebarItem.id;
+  var item;
+  var listId = sidebarItem.parentNode.parentNode.id;
+  switch (listId){
+    case 'sidebarItems':
+      item = await getCustomPromptItem(id);
+      break;
+    case 'libraryPrompts':
+      item = await getPromptLibraryItem(id);
+      break;
+    default:
+      // shouldn't happen
+      return;
+  }
+  updateForm(item);  
 }
 
 function getCurrentItemId(){
@@ -101,11 +145,10 @@ function instantiateSidebarItem(id){
   return sidebarItem;
 }
 
-function addSidebarItem(promptInfo, selected) {
-  var sidebarItems = getSidebarItems();
+function addSidebarItem(sidebarItemsContainer, promptInfo, selected) {
   var sidebarItem = instantiateSidebarItem(promptInfo.id);
-  sidebarItems.appendChild(sidebarItem);
-  sidebarItems = sidebarItems.getElementsByTagName('li');
+  sidebarItemsContainer.appendChild(sidebarItem);
+  sidebarItems = sidebarItemsContainer.getElementsByTagName('li');
   sidebarItem = sidebarItems[sidebarItems.length - 1];
   
   var label = sidebarItem.querySelector('label');
@@ -117,8 +160,10 @@ function addSidebarItem(promptInfo, selected) {
   }
   icon.src = src;
   
+  var radio = sidebarItem.querySelector('input[type=radio]');
+  radio.name = sidebarItemsContainer.id + '_itemSelection'
   if (selected === true) {
-    sidebarItem.querySelector('input[type=radio]').click();
+    radio.click();
     updateForm();
     document.getElementById('name').select();
     document.getElementById('name').focus();
@@ -158,17 +203,34 @@ async function storePromptsToStorage(prompts){
 
 async function loadOptions(event){
   var sidebarItems = getSidebarItems();
-  sidebarItems.innerHTML = '';
+  while (sidebarItems.childNodes.length) {
+    sidebarItems.removeChild(sidebarItems.childNodes[0]);
+  }
   var prompts = await getPromptsFromStorage();
   var firstSidebarItem;
   for (var i = 0; i < prompts.length; i++){
     var promptInfo = prompts[i];
-    addSidebarItem(promptInfo);
+    addSidebarItem(sidebarItems, promptInfo);
   }
 }
 
 function getNewItemId(){
   return crypto.randomUUID();
+}
+
+async function addToCollectionClickedHandler(event){
+  var item = getFormData();
+  var prompts = await getPromptsFromStorage();
+  
+  var index = await findItemIndex(id);
+  if (index === -1) {
+    prompts.push(item);
+  }
+  else {
+    prompts[index] = getFormData();
+  }
+  await storePromptsToStorage(prompts);
+  await loadOptions();
 }
 
 async function addNewClickedHandler(event){
@@ -184,7 +246,7 @@ async function addNewClickedHandler(event){
 
 async function cloneCurrentClickedHandler(){
   var id = getCurrentItemId();
-  var item = await getItem(id);
+  var item = await getCustomPromptItem(id);
   var newItem = Object.assign({}, item, {
     id: getNewItemId()
   });
@@ -195,7 +257,7 @@ async function addNewItem(newItem){
   var prompts = await getPromptsFromStorage();
   prompts.push(newItem);
   await storePromptsToStorage(prompts);
-  addSidebarItem(newItem, true);
+  addSidebarItem(getSidebarItems(), newItem, true);
 }
 
 async function findItemIndex(id){
@@ -206,7 +268,7 @@ async function findItemIndex(id){
   return index;
 }
 
-async function getItem(id){
+async function getCustomPromptItem(id){
   var index = await findItemIndex(id);
   if (index === -1) {
     return undefined;
@@ -230,11 +292,12 @@ async function deleteCurrentClickedHandler(event){
   }
   var sidebar = currentSidebarItem.parentNode;
   sidebar.removeChild(currentSidebarItem);
+  clearForm();
 }
 
 async function restoreCurrentClickedHandler(event){
   var id = getCurrentItemId();
-  var item = await getItem(id);
+  var item = await getCustomPromptItem(id);
   updateForm(item);
   updateCurrentSidebarItemFromForm();
 }
@@ -246,6 +309,10 @@ async function saveCurrentClickedHandler(event){
   prompts[index] = getFormData();
   await storePromptsToStorage(prompts);
   setFormStateDirty(false);
+}
+
+async function contributeCurrentClickedHandler(event){
+  window.open(`https://github.com/${githubowner}/${githubrepo}/wiki/Custom-Prompts#contributing-to-the-online-prompt-library`, 'image-to-text-contributing');
 }
 
 function setFormStateDirty(state){
@@ -520,17 +587,109 @@ async function importPromptsFileChangedHandler(event){
   loadOptions();
 }
 
+var promptLibraryRepoUrl = `https://api.github.com/repos/${githubowner}/${githubrepo}/contents/prompts`;
+async function initPromptLibrary(){
+  try {
+    var response = await fetch(promptLibraryRepoUrl);
+    if (response.status !== 200){
+      return;
+    }
+    var data = await response.json();
+    var libraryPrompts = getLibraryPrompts();
+    for (var i = 0; i < data.length; i++){
+      var libraryPrompt = data[i];
+      addSidebarItem(libraryPrompts, {
+        id: libraryPrompt.name,
+        name: libraryPrompt.name
+      });
+    }
+  }
+  catch(e){
+  }
+}
+
+async function getPromptLibraryItem(id){
+  var promptLibraryItemUrl = `${promptLibraryRepoUrl}/${encodeURIComponent(id)}/prompt.json`;
+  var doc = await fetch(promptLibraryItemUrl);
+  if (doc.status !== 200 ){
+    throw new Error(`Error downloading prompt "${id}" from online prompt library.`);
+  }
+  var item;
+  var obj = await doc.json();
+  if (obj.content){
+    var encoding = obj.encoding;
+    switch (encoding){
+      case 'base64':
+        item = atob(obj.content);
+        item = JSON.parse(item);
+        break;
+      default:
+    }
+  }
+
+  if (!item){
+    var downloadUrl = obj.download_url;
+    var itemDoc = await fetch(downloadUrl);
+    if (itemDoc.status !== 200) {
+      throw new Error(`Error downloading prompt "${id}" from online prompt library.`);
+    }
+    item = await itemDoc.json();
+  }
+    
+  return item;
+}
+
+function searchHandler(event){
+  var searchElement = event.target;
+  var searchTerm = searchElement.value;
+  var regexp;
+  if (searchTerm.length){
+    var escapatedSearchTerm = RegExp.escape(searchTerm);
+    var regexp = new RegExp(escapatedSearchTerm, 'ig');
+  }
+  var tab = searchElement.parentNode.parentNode;
+  var itemContainer = tab.querySelector('ul');
+  var items = itemContainer.querySelectorAll('li > label');
+  for (var i = 0; i < items.length; i++){
+    var item = items.item(i);
+    var text = item.textContent;
+    var matched = regexp ? regexp.test(text) : true;
+    if (matched){
+      item.parentNode.removeAttribute('data-matches-search');
+    }
+    else {
+      item.parentNode.setAttribute('data-matches-search', matched);
+    }
+  }
+}
+
+async function tabSelectionChanged(event){
+  var target = event.target;
+  var selectedItem = target.parentNode.querySelector('div[role=tabpanel] > ul > li > input[type=radio]:checked');
+  updateFormStateForSidebarItem(selectedItem);
+}
+
+async function init(){
+  await loadOptions();
+  await initPromptLibrary();
+}
+
 document.getElementById('name').addEventListener('input', formChangedHandler);
 document.getElementById('prompt').addEventListener('input', formChangedHandler);
 document.getElementById('responseConstraint').addEventListener('input', formChangedHandler);
 
+document.getElementById('addToCollection').addEventListener('click', addToCollectionClickedHandler);
 document.getElementById('addNew').addEventListener('click', addNewClickedHandler);
 document.getElementById('exportPrompts').addEventListener('click', exportPromptsClickedHandler);
 document.getElementById('importPrompts').addEventListener('click', importPromptsClickedHandler);
 document.getElementById('importPromptsFile').addEventListener('change', importPromptsFileChangedHandler);
 document.getElementById('saveCurrent').addEventListener('click', saveCurrentClickedHandler);
+document.getElementById('contributeCurrent').addEventListener('click', contributeCurrentClickedHandler);
 document.getElementById('cloneCurrent').addEventListener('click', cloneCurrentClickedHandler);
 document.getElementById('deleteCurrent').addEventListener('click', deleteCurrentClickedHandler);
 document.getElementById('restoreCurrent').addEventListener('click', restoreCurrentClickedHandler);
 document.getElementById('generateJsonSchema').addEventListener('click', generateJsonSchemaClickedHandler);
-document.addEventListener('DOMContentLoaded', loadOptions);
+document.getElementById('searchCustomPrompts').addEventListener('search', searchHandler);
+document.getElementById('searchLibraryPrompts').addEventListener('search', searchHandler);
+addTabSelectionChangedHandler(document.querySelector('*[role=tablist]'), tabSelectionChanged)
+document.addEventListener('DOMContentLoaded', init);

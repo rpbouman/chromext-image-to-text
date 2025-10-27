@@ -1,0 +1,5 @@
+{
+  "id": "f02df71d-b12a-45df-ab21-0ca20eb0fe28",
+  "name": "Extract only Text",
+  "prompt": "The image contains mostly text. It might be a screenshot of an online newssite or a photograph of a physical book or magazine.\nReturn only the extracted text. \nUse markdown to represent the structure and style of the text in the image.\n"
+}
