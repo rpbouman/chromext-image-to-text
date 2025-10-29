@@ -285,7 +285,7 @@ async function deleteCurrentClickedHandler(event){
   }
   var id = currentSidebarItem.querySelector('input[type=radio]').id;
   var prompts = await getPromptsFromStorage();
-  var index = findItemIndex(id);
+  var index = await findItemIndex(id);
   if (index !== -1){
     prompts.splice(index, 1);
     await storePromptsToStorage(prompts);
