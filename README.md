@@ -5,7 +5,11 @@
 
 In addition to the generic Image-to-Text option, you can also create and maintain your own custom prompts from the extension's option page. These will be persisted and appear as subitems of the Image-to-Text contextmenu:
 
-<img width="1280" height="717" alt="image" src="https://github.com/user-attachments/assets/360f04a1-1526-4ae5-bbaf-c0826570354e" />
+<img width="983" height="594" alt="image" src="https://github.com/user-attachments/assets/6438d95b-8f49-4ee0-b254-51bafdc635c3" />
+
+Finally, this repository also hosts an online library of prompts that you can add to your personal collection, also from the options page:
+
+<img width="983" height="434" alt="image" src="https://github.com/user-attachments/assets/ec76254b-47e9-45ea-a76f-ae32834fc27a" />
 
 To see it in action, checkout this demo video on Youtube: https://www.youtube.com/watch?v=0w4jdvy7ZAg
 
