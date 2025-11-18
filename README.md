@@ -36,8 +36,18 @@ That's it! Oh, if you're wondering about the cautionary popup when installing th
 - The extension creates a dialog to inform you of the process. This dialog is rendered inside the page from where you right clicked on the image, thereby altering it.
 
 The way these features are used by this extension should be totally safe. But the permissions themselves would obviously also allow malicious extensions to steal you data, impersonate you, etc.
-
 If you still have doubts, then perhaps you might feel comfortable by downloading this repository, reviewing the code for yourself and then install locally. 
+
+# Important! Prerequisites prior to use 
+The image-to-text contextmenu extension relies on [Chrome's built-in AI API's](https://developer.chrome.com/docs/ai/built-in). Today these API's are still experimental. In order to use them, you need to enable a couple of feature flags:
+- navigate to chrome://flags
+- In the search box, type "Gemini"
+- Enable the "Prompt API for Gemini Nano" flag
+- Enable the "Prompt API for Gemini Nano with Multimodal Input" flag 
+
+<img width="956" height="860" alt="image" src="https://github.com/user-attachments/assets/d69518a3-67d3-4651-8e3c-2e37f7e1d0e5" />
+
+With these flags enabled, you should be able to use the plugin. Please keep in mind that for the initial use, the browser needs to download the model. This can take a while.
 
 # Description
 
