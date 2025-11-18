@@ -380,6 +380,10 @@ async function getBaseModel(){
     return undefined;
   }
   baseModel = await LanguageModel.create({
+    expectedOutputs: [{
+      type: 'text',
+      languages: ['en']
+    }],
     initialPrompts: [
       {
         role: 'system', 
@@ -412,6 +416,9 @@ async function getModel(){
 }
 
 async function generateJsonSchemaClickedHandler(event){
+  var responseConstraintElement = document.getElementById('responseConstraint');
+  var form = responseConstraintElement.form;
+  form.setAttribute('aria-busy', true);
   var model = await getModel();
   var promptElement = document.getElementById('prompt');
   var promptText = promptElement.value;
@@ -429,24 +436,31 @@ async function generateJsonSchemaClickedHandler(event){
       `Prefer to define attributes as required`
     ].join('\r\n');
   }
-
-  var responseConstraintElement = document.getElementById('responseConstraint');
   responseConstraintElement.value = '';
-  var responseStream = await model.promptStreaming([{
-    role: 'user',
-    content: promptText
-  }], {
-    responseConstraint: {
-      "type": "object"
+  try {
+    var responseStream = await model.promptStreaming([{
+      role: 'user',
+      content: promptText
+    }], {
+      responseConstraint: {
+        "type": "object"
+      }
+    });
+    var response = '';
+    for await (var chunk of responseStream) {
+      response += chunk;
+      responseConstraintElement.value = response;
+      responseConstraintElement.scrollTop = responseConstraintElement.scrollHeight;
     }
-  });
-  var response = '';
-  for await (var chunk of responseStream) {
-    response += chunk;
-    responseConstraintElement.value = response;
-    responseConstraintElement.scrollTop = responseConstraintElement.scrollHeight;
+    validateResponseConstraint(responseConstraintElement);
+    responseConstraintElement.value = JSON.stringify(JSON.parse(response), null, 2);
   }
-  validateResponseConstraint(responseConstraintElement);
+  catch(e){
+    responseConstraintElement.value = e.message;
+  }
+  finally {
+    form.removeAttribute('aria-busy');
+  }
 }
 
 function downloadURL(url, fileName) {
