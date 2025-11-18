@@ -10,10 +10,10 @@ header {
   border-bottom-style: solid;
   border-bottom-width: 1px;
   border-bottom-color: rgb(200,200,200);
-  
+
   > menu[role=toolbar] {
 
-    font-family: system-ui;      
+    font-family: system-ui;
     margin-block-start: 2px;
     margin-block-end: 2px;
     padding-inline-start: 2px;
@@ -21,7 +21,7 @@ header {
     > li[role=menuitem] {
       display: inline-block;
       list-style: none;
-      
+
       > input#importPromptsFile {
         display: none;
       }
@@ -31,14 +31,14 @@ header {
 
 
 body {
-    
+
   > main {
-    
+
     height: 100%;
     display: grid;
     grid-template-columns: 1fr 99fr;
     grid-template-rows: 1fr 98fr 1fr;
-    
+
     > div > section > form > label::after,
     > nav  search > label::after {
       content: ': ';
@@ -56,26 +56,26 @@ body {
       border-right-width: 1px;
       border-right-color: rgb(200,200,200);
       padding-top: 6px;
-            
+
       search {
         margin: 1em 0em 1em 1em;
 
         > input[type=search] {
           width: calc( 100% - 4em );
-        }      
-        
+        }
+
       }
-      
+
       ul#sidebarItems,
       ul#libraryPrompts {
-        
+
         padding-block-start: 0em;
         padding-block-end: 0em;
         padding-inline-start: 1em;
         list-style-type: none;
-        
+
         > li {
-  
+
           > img {
             display: inline-block;
             margin: 2px;
@@ -89,64 +89,63 @@ body {
             vertical-align: top;
             margin-top: 2px;
           }
-          
+
           > input[type=radio] {
             appearance: none;
             display: none;
           }
         }
-        
+
         > li[data-matches-search=false] {
           display: none;
         }
-        
+
         > li:has( > input[type=radio]:checked ) {
           background-color: Highlight;
           color: HighlightText;
         }
-        
+
         > li:hover {
           background-color: Highlight;
           color: HighlightText;
         }
       }
-      
-    }    
-    
+
+    }
+
     > div {
-      
+
       > section#editPromptUi {
         font-family: system-ui;
-      }        
-      
+      }
+
       > section#gettingStarted,
       > section#noPromptSelected,
       > section#noLibraryPromptSelected {
         font-family: sans-serif;
-        font-size: 12pt;  
-        
+        font-size: 12pt;
+
         h1:first-child {
           margin-block-start: 0px;
         }
-          
+
         label[for] {
           color: blue;
           text-decoration: underline;
           cursor:pointer;
         }
       }
-      
-      
-      > section {        
+
+      > section {
         padding-left: .5em;
         padding-top: 4px;
         overflow-y: scroll;
-        
+
         > header {
           position: fixed;
           background: white;
         }
-        
+
         > form {
           margin-top: 2em;
           display: grid;
@@ -154,48 +153,72 @@ body {
           grid-auto-flow: row;
           grid-gap: 0.25em;
           padding-top: 0.75em;
-                  
+
           > input#name {
             width: 30ch;
           }
-          
+
           > textarea {
             resize: vertical;
           }
-          
+
           > input:invalid,
           > textarea:invalid {
             background-color: red;
             color: white;
           }
-          
+
           > menu[role=toolbar] {
             list-style: none;
-            
+
             margin-block-start: 0px;
             margin-block-end: 0px;
             padding-inline-start: 0px;
             display: inline-flex;
-            
+
             > li {
               > button {
               }
             }
           }
-          
+
           input[readonly],
           textarea[readonly] {
             background-color: ButtonFace;
             outline-style: none;
           }
+
+          > progress#generateJsonSchemaProgress {
+            visibility: hidden;
+          }
+          
+        }
+        
+        > form#currentItemForm[aria-busy=true] {
+          
+          > progress#generateJsonSchemaProgress {
+            visibility: visible;
+          }
+          
+          > menu[role=toolbar] {
+            > li {
+              > button#generateJsonSchema {
+                pointer-events: none;
+                color: GrayText;
+              }
+            }
+          }
         }
       }
-      
-      > section:has( > form#currentItemForm > *:invalid ){
+
+      > section:has( 
+        > form#currentItemForm > *:invalid,
+        > form#currentItemForm[aria-busy=true] 
+      ){
         > header {
           > menu {
             > li {
-              
+
               > button#saveCurrent {
                 pointer-events: none;
                 color: GrayText;
@@ -205,23 +228,28 @@ body {
         }
       }
 
-      > section:has( > form#currentItemForm[data-dirty=false] ) {
+      > section:has( 
+        > form#currentItemForm[data-dirty=false]
+      ) {
         > header {
           > menu {
             > li {
-              
+
               > button#saveCurrent,
               > button#restoreCurrent {
                 pointer-events: none;
                 color: GrayText;
               }
-              
+
             }
           }
         }
       }
-      
-      > section:has( > form#currentItemForm[data-dirty=true] ) {
+
+      > section:has( 
+        > form#currentItemForm[data-dirty=true],
+        > form#currentItemForm[aria-busy=true] 
+      ) {
         > header {
           > menu {
             > li {
@@ -233,11 +261,11 @@ body {
           }
         }
       }
-      
+
     }
 
     > footer {
-      font-family: system-ui;      
+      font-family: system-ui;
       grid-row: 3;
       grid-column: 1/3;
       border-top-style: solid;
@@ -259,9 +287,9 @@ body {
     }
   }
 
- 
+
   > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul  ) {
-    
+
     > header {
       > menu[role=toolbar]#customPromptsToolbar {
         > li {
@@ -282,7 +310,7 @@ body {
       > section#noLibraryPromptSelected,
       > section#editPromptUi {
         display: none;
-      }    
+      }
     }
   }
 
@@ -308,7 +336,7 @@ body {
       > section#noLibraryPromptSelected,
       > section#editPromptUi {
         display: none;
-      }    
+      }
     }
   }
 
@@ -323,15 +351,15 @@ body {
       > section#noPromptSelected,
       > section#editPromptUi {
         display: none;
-      }    
+      }
     }
   }
-  
+
   /* if an item is selected, we get to edit it > main:has( > nav ul > li > input[type=radio]:checked )  */
   > main:has( > nav > form[role=tablist] > div > input#customPrompts:checked + div[role=tabpanel] > ul > li > input[type=radio]:checked ),
   > main:has( > nav > form[role=tablist] > div > input#promptLibrary:checked + div[role=tabpanel] > ul > li > input[type=radio]:checked )
   {
-    
+
     > div {
 
       > section#editPromptUi {
@@ -344,22 +372,22 @@ body {
         display: none;
       }
     }
-    
+
   }
 
   > main {
-    
+
     > header {
       > menu[role=toolbar] {
         visibility: hidden;
       }
     }
-    
+
     > div {
       > section {
         menu[role=toolbar] {
           display: none;
-        }  
+        }
       }
     }
   }
@@ -370,7 +398,7 @@ body {
         visibility: visible;
       }
     }
-    
+
     > div {
 
       > section {
@@ -379,7 +407,7 @@ body {
             display:block;
           }
         }
-       
+
         > form {
           > menu#customPromptExtraToolbar[role=toolbar] {
             display:block;
@@ -390,7 +418,7 @@ body {
   }
 
   > main:has(  > nav > form[role=tablist] > div > input#promptLibrary:checked ) {
-    
+
     > div {
       > section {
         > header {
@@ -405,14 +433,17 @@ body {
         }
       }
     }
-    
+
   }
 
-  /* 
-    if the currently select prompt has been edited, we cannot select another one. 
+  /*
+    if the currently select prompt has been edited, we cannot select another one.
     the user needs to either save or restore to continue with something else.
   */
-  > main:has( > div > section#editPromptUi > form#currentItemForm[data-dirty=true] ) {
+  > main:has( 
+    > div > section#editPromptUi > form#currentItemForm[data-dirty=true],
+    > div > section#editPromptUi > form#currentItemForm[aria-busy=true] 
+  ) {
     > nav {
       pointer-events: none;
     }
