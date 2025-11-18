@@ -32,6 +32,14 @@ function updateForm(item){
     
     var value = item[property];
     if (currentItemFormElement.name === 'responseConstraint'){
+      switch (typeof value) {
+        case 'string':
+          break;
+        case 'object':
+          value = JSON.stringify(value, null, 2);
+          break;
+      }
+      
       currentItemFormElement.value = value;
       validateResponseConstraint(currentItemFormElement);
     }
